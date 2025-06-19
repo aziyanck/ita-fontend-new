@@ -1,25 +1,19 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import Navbar from './components/Navbar'
-
-import Services from './components/Services'
+import Navbar from './components/Navbar';
 import ScrollDiv from './components/ScrollDiv';
-import Brands from './components/Brands'
-import WhyIta from './components/WhyIta'
-import Contact from './components/Contact'
-import Review from './components/Review';
-import Features from './components/Features';
-import Footer from './components/Footer';
-
-import LogoCaro from './components/LogoCaro'
-
-
 import featuresData from './components/sub_comp/features_data';
 
-
-
-
+// Lazy Load Components
+const Services = lazy(() => import('./components/Services'));
+const Brands = lazy(() => import('./components/Brands'));
+const WhyIta = lazy(() => import('./components/WhyIta'));
+const Contact = lazy(() => import('./components/Contact'));
+const Review = lazy(() => import('./components/Review'));
+const Features = lazy(() => import('./components/Features'));
+const Footer = lazy(() => import('./components/Footer'));
+const LogoCaro = lazy(() => import('./components/LogoCaro'));
 
 function App() {
 
@@ -28,38 +22,37 @@ function App() {
       duration: 1000,
       once: false,
       mirror: true,
-
-    })
-
+    });
   }, []);
 
-
   return (
-    <div className=' overflow-x-clip'>
+    <div className='overflow-x-clip'>
       <Navbar />
+     
       <ScrollDiv />
-      <Services />
-      
-      {featuresData.map((section, index) => (
-        <Features
-          key={index}
-          title={section.title}
-          mainImage={section.mainImage}
-          carouselImages={section.carouselImages}
-        />
-      ))}
-      <LogoCaro />
-      <div className=' md:h-screen  flex flex-col justify-center items-center'>
-        <Brands />
-        <WhyIta />
-      </div>
-      <Contact />
-      <Review />
-      <Footer />
 
-
+  
+      <Suspense fallback={<div className="text-center py-10">Loading...</div>}>
+        <Services />
+        {featuresData.map((section, index) => (
+          <Features
+            key={index}
+            title={section.title}
+            mainImage={section.mainImage}
+            carouselImages={section.carouselImages}
+          />
+        ))}
+        <LogoCaro />
+        <div className='md:h-screen flex flex-col justify-center items-center'>
+          <Brands />
+          <WhyIta />
+        </div>
+        <Contact />
+        <Review />
+        <Footer />
+      </Suspense>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

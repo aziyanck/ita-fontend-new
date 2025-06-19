@@ -11,7 +11,7 @@ function ServiceCard({ img, title, desc }) {
                 />
             </div>
 
-            <div className="text  md:w-[40%] mt-4 ml-20 mx-4 h-auto w-full break-words">
+            <div className="text  md:w-[40%] mt-4 md:ml-20 mx-4 h-auto w-full break-words">
                 <h2 className="poppins-black text-base sm:text-lg text-st md:text-4xl leading-snug break-words whitespace-normal">
                     {title}
                 </h2>
