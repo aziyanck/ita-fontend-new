@@ -32,8 +32,9 @@ function Home() {
       <Navbar />
       <ScrollDiv />
 
+
+      <Services />
       <Suspense fallback={null}>
-        <Services />
         {featuresData.map((section, index) => (
           <Features
             key={index}
