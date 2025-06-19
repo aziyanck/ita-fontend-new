@@ -3,8 +3,10 @@ import { DarkModeSwitch } from 'react-toggle-dark-mode';
 import logo from '../assets/logo.png';
 import logob from '../assets/logob.png';
 import '../index.css';
+import { Link } from 'react-router-dom';
 
 import ButtonLogin from './animations/ButtonLogin'
+import LoginComponent from '../admin_components/LoginComponent';
 
 function Navbar() {
     const [scrolled, setScrolled] = React.useState(false);
@@ -70,7 +72,11 @@ function Navbar() {
                     <li><a href="#services" className='poppins-bold'>Services</a></li>
                     <li><a href="#about" className='poppins-bold'>About</a></li>
                     <li><a href="#contact" className='poppins-bold'>Contact</a></li>
-                    <li><ButtonLogin /></li>
+                    <Link
+                        to="/login"
+                     className='poppins-bold'>
+                       Login
+                    </Link>
 
                 </ul>
 
@@ -109,7 +115,9 @@ function Navbar() {
                         <li><a href="#services" onClick={() => setMenuOpen(false)}>Services</a></li>
                         <li><a href="#about" onClick={() => setMenuOpen(false)}>About</a></li>
                         <li><a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a></li>
-                        <li > <a href="#" onClick={() => setMenuOpen(false)}>LogIn</a></li>
+                        <li > <Link to="/login" >
+                            Login
+                        </Link></li>
                     </ul>
 
                 </div>
