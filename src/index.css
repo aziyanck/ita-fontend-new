@@ -1,0 +1,346 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import "tailwindcss";
+
+
+
+body {
+  font-family: "Poppins", sans-serif;
+  font-style: normal;
+}
+
+.poppins-thin {
+  font-family: "Poppins", sans-serif;
+  font-weight: 100;
+  font-style: normal;
+}
+
+.poppins-extralight {
+  font-family: "Poppins", sans-serif;
+  font-weight: 200;
+  font-style: normal;
+}
+
+.poppins-light {
+  font-family: "Poppins", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.poppins-regular {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.poppins-medium {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.poppins-semibold {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.poppins-bold {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.poppins-extrabold {
+  font-family: "Poppins", sans-serif;
+  font-weight: 800;
+  font-style: normal;
+}
+
+.poppins-black {
+  font-family: "Poppins", sans-serif;
+  font-weight: 900;
+  font-style: normal;
+}
+
+.poppins-thin-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 100;
+  font-style: italic;
+}
+
+.poppins-extralight-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 200;
+  font-style: italic;
+}
+
+.poppins-light-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.poppins-regular-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.poppins-medium-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.poppins-semibold-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.poppins-bold-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.poppins-extrabold-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 800;
+  font-style: italic;
+}
+
+.poppins-black-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 900;
+  font-style: italic;
+}
+
+
+:root {
+  --primary: #ffffff;
+  --secondary: #0a4a75;
+  --tertiary: #032e53;
+}
+
+* {
+  font-family: "Poppins", serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+body {
+  margin: 0;
+  /* height: 100vh; */
+  color: var(--primary);
+  background: linear-gradient(160deg, #ffffff, #f0f4f8);
+}
+
+
+.typed-cursor {
+  color: #D97706;
+}
+
+
+
+
+
+/* 
+.feature {
+    position: relative;
+    z-index: 1;
+} */
+
+.blob-outer-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  filter: blur(100px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.blob-inner-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  transform: scale(0.5);
+}
+
+.blob {
+  width: 100%;
+  height: 100%;
+  background: conic-gradient(from 90deg, rgb(158, 203, 243), rgb(159, 208, 241));
+}
+
+
+/* blure gradient */
+
+/* .blob-outer-container {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  z-index: -2;
+  inset: 0;
+  margin: auto;
+  filter: blur(100px);
+  opacity: 0.5;
+}
+
+.blob-inner-container {
+  border-radius: 99999px;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 100vw;
+  height: 100vh;
+  min-width: 1000px;
+  overflow: hidden;
+  background-color: #fff;
+  transform: scale(0.7);
+}
+
+.blob {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  inset: 0;
+  margin: auto;
+  background: conic-gradient(from 0deg, #08f,  #09f);
+  animation: spinBlob 8s linear infinite;
+} */
+/* blure gradient */
+
+.text-st {
+  @apply text-[#161616] group-[.dark-mode]:text-white
+}
+
+.text-lt {
+  @apply text-[#040138] group-[.dark-mode]:text-white/90
+}
+
+.text-ft {
+  @apply text-[#3a393a] group-[.dark-mode]:text-white/90
+}
+
+
+.light-text-s {
+  @apply text-[#161616]
+}
+
+.light-text-l {
+  @apply text-[#040138]
+}
+
+.light-text-vl {
+  @apply text-[#5b5b5e]
+}
+
+.dark-text-s {
+  @apply group-[.dark-mode]:text-white
+}
+
+.dark-text-l {
+  @apply group-[.dark-mode]:text-white/90
+}
+
+.i-text {
+  @apply text-3xl md:text-4xl
+}
+
+.l-bg {
+  @apply group-[.dark-mode]:bg-gray-200/10 bg-[#9fabb63d]
+}
+
+.card-v {
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+
+  @apply m-4 flex flex-col md:w-[25%] md:h-[40vh] justify-center items-center gap-4 rounded-2xl bg-white/10 backdrop-blur-lg group-[.dark-mode]:shadow-none group-[.dark-mode]:shadow-2xl transition-transform duration-200 ease-in-out hover:scale-101 hover:cursor-pointer hover:border-2 hover:border-[#4b4880] hover:group-[.dark-mode]:border-white
+}
+
+
+.i-box {
+  @apply px-4 w-auto placeholder-gray-400 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8.9px);
+  -webkit-backdrop-filter: blur(8.9px);
+  border: 1px solid rgba(255, 255, 255, 0.83);
+}
+
+.glass-h {
+  background: rgba(255, 255, 255, 0.05);
+
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8.9px);
+  -webkit-backdrop-filter: blur(8.9px);
+}
+
+.bgg {
+  @apply bg-white group-[.dark-mode]:bg-[#161616]
+}
+
+
+@media (max-width: 767px) {
+  .mobile {
+    @apply flex flex-col items-center text-center
+  }
+
+}
+
+
+html.dark-mode body {
+  background: #161616;
+
+}
+
+.hover-s-up {
+  @apply hover:translate-y-[-4px] hover:scale-105 transition-all duration-300 ease-in-out
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+
+.gd-text {
+  @apply bg-gradient-to-r from-slate-900 to-gray-800 group-[.dark-mode]:from-[#ffffff] group-[.dark-mode]:to-[#acacac] bg-clip-text text-transparent
+}
+
+.gd-text {
+  @apply text-transparent bg-clip-text bg-gradient-to-r from-blue-950 to-cyan-800 group-[.dark-mode]:bg-gradient-to-r group-[.dark-mode]:from-[#ffffff] group-[.dark-mode]:to-[#868686]
+}
+
+
+
+@layer utilities {
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  .perspective {
+    perspective: 1000px;
+  }
+
+  .transform-style {
+    transform-style: preserve-3d;
+  }
+
+  .rotate-x-180 {
+    transform: rotateX(180deg);
+  }
+}

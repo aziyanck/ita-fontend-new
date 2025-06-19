@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+/*
+ * Styles for the Logo Carousel
+ */
+
+/* The main container for the carousel.
+ * It has a fixed height to show exactly two rows and hides the rest.
+ * The `position: relative` is for potential overlays or absolute positioning inside.
+ */
+.logo-box {
+  height: 260px; /* Each row is 130px, so 2 rows = 260px */
+  overflow: hidden;
+  width: 90%; /* Set to less than 100% to create side gaps */
+  margin: 0 auto; /* Center the container horizontally */
+  max-width: 1200px; /* Limits the width on very large screens */
+  padding: 0 1rem; /* Adds some space on the sides */
+  box-sizing: border-box;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.05); /* A subtle background */
+  position: relative;
+}
+
+/* The slider element that contains all the rows and moves vertically.
+ * The animation 'slideUp' creates the infinite scrolling effect.
+ */
+.logo-slider {
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 15s linear infinite; /* Increased duration for a slower, smoother scroll */
+}
+
+/* A single row of logos.
+ * Uses flexbox to distribute logos evenly.
+ */
+.logo-row {
+  display: flex;
+  justify-content: space-around; /* Use space-around for better spacing distribution */
+  align-items: center;
+  gap: 40px; /* Default horizontal spacing for large screens */
+  height: 130px; /* Fixed height for each row */
+  padding: 10px 0;
+  flex-shrink: 0; /* Prevents rows from shrinking */
+}
+
+/* Individual logo images */
+.logo-img {
+  width: 80px;  /* Default size for large screens */
+  height: 80px; /* Default size for large screens */
+  object-fit: contain; /* Ensures the whole logo is visible without distortion */
+  border-radius: 8px;
+}
+
+/* The vertical sliding animation.
+ * It moves the .logo-slider up by the height of two rows (260px),
+ * creating the illusion of an infinite loop because the rows are duplicated.
+ */
+@keyframes slideUp {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-260px);
+  }
+}
+
+/* === Responsive Design === */
+
+/* For Tablets (e.g., iPads) */
+@media (max-width: 1024px) {
+  .logo-row {
+    gap: 30px; /* Reduce the gap between logos */
+  }
+  .logo-img {
+    width: 70px; /* Make logos slightly smaller */
+    height: 70px;
+  }
+}
+
+/* For smaller tablets and large mobile phones */
+@media (max-width: 768px) {
+    .logo-box {
+        height: 240px; /* Adjust container height */
+    }
+    .logo-row {
+        gap: 25px; /* Adjust the gap */
+        height: 120px; /* Adjust row height */
+    }
+    .logo-img {
+        width: 60px; /* Adjust logo size */
+        height: 60px;
+    }
+    /* Keyframes must be re-declared inside media queries to override */
+    @keyframes slideUp {
+        100% {
+            transform: translateY(-240px); /* Adjust animation to new height */
+        }
+    }
+}
+
+/* For standard mobile phones */
+@media (max-width: 480px) {
+    .logo-box {
+        height: 200px; /* Further reduce container height */
+        padding: 0 0.5rem; /* Reduce side padding */
+    }
+    .logo-row {
+        gap: 20px; /* Minimize the gap */
+        height: 100px;  /* Reduce row height */
+        justify-content: space-around;
+    }
+    .logo-img {
+        width: 48px; /* Make logos smaller to fit better */
+        height: 48px;
+    }
+    /* Keyframes must be re-declared inside media queries to override */
+     @keyframes slideUp {
+        100% {
+            transform: translateY(-200px); /* Adjust animation to new height */
+        }
+    }
+}
