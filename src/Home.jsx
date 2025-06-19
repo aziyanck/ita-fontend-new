@@ -18,7 +18,8 @@ function Home() {
     <div className="overflow-x-clip">
       <Navbar />
       <ScrollDiv />
-      <Suspense fallback={<div>Loading...</div>}>
+
+      
         <Services />
         {featuresData.map((section, index) => (
           <Features
@@ -36,7 +37,7 @@ function Home() {
         <Contact />
         <Review />
         <Footer />
-      </Suspense>
+      
     </div>
   );
 }

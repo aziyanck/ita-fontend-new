@@ -56,7 +56,7 @@ const LoginComponent = () => {
               placeholder="Email or Username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full  text-white placeholder-gray-400 border border-gray-600 rounded-lg py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
+              className="w-full  text-lt placeholder-gray-400 border border-gray-600 rounded-lg py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
               required
             />
           </div>
@@ -71,7 +71,7 @@ const LoginComponent = () => {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full  text-white placeholder-gray-400 border border-gray-600 rounded-lg py-3 pl-12 pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
+              className="w-full  text-lt placeholder-gray-400 border border-gray-600 rounded-lg py-3 pl-12 pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
               required
             />
             <button
