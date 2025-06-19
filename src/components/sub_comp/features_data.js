@@ -1,6 +1,6 @@
-import smartHomeMain from "../../assets/carousel/smart-home.jpg";
-import smartLivingMain from "../../assets/carousel/smart-living.jpg";
-import smartOfficeMain from "../../assets/carousel/smart-office.jpg";
+import smartHomeMain from "../../assets/carousel/smart-home.webp";
+import smartLivingMain from "../../assets/carousel/smart-living.webp";
+import smartOfficeMain from "../../assets/carousel/smart-office.webp";
 
 import cctv from "../../assets/carousel/cctv.png";
 import lock from "../../assets/carousel/lock.png";
