@@ -1,18 +1,12 @@
 import { useEffect, useState } from "react";
 import './LogoCaro.css';
+import { useMediaQuery } from "react-responsive";
 
-/**
- * LogoCaro Component
- * * This component displays a continuously scrolling vertical carousel of brand logos.
- * It dynamically imports logo images from a specified directory.
- */
 function LogoCaro() {
   const [logos, setLogos] = useState([]);
- 
-  // Effect to load logo images on component mount.
-  // It uses import.meta.glob for vite-based projects to eagerly load all images from the assets folder.
+  const isMobile = useMediaQuery({ maxWidth: 768 });
+
   useEffect(() => {
-    // Note: The path is relative to the component file. Adjust if your folder structure is different.
     const imports = import.meta.glob("../assets/Brand_logos/*.{png,jpg,jpeg,svg}", {
       eager: true,
     });
@@ -20,14 +14,15 @@ function LogoCaro() {
     setLogos(paths);
   }, []);
 
-  // Organize logos into rows. Each row will contain up to 7 logos.
-  const rows = [];
-  for (let i = 0; i < logos.length; i += 7) {
-    rows.push(logos.slice(i, i + 7));
-  }
+  const logosPerRow = isMobile ? 4 : 8;
+  const rowsToShow = isMobile ? 4 : 2;
+  const totalHeight = isMobile ? 300 : 260; // match CSS animation
 
-  // We only want to display the first two rows in the carousel.
-  const twoRows = rows.slice(0, 2);
+  const rows = [];
+  for (let i = 0; i < logos.length; i += logosPerRow) {
+    rows.push(logos.slice(i, i + logosPerRow));
+  }
+  const visibleRows = rows.slice(0, rowsToShow);
 
   return (
     <div className="relative w-full flex flex-col items-center bg-transparent py-8 sm:py-12">
@@ -39,11 +34,11 @@ function LogoCaro() {
       </p>
 
       {/* The main container for the logo carousel. It has a fixed height and hides overflow. */}
-      <div className="logo-box ">
+      <div className="logo-box" style={{ height: `${totalHeight}px` }}>
         {/* The slider contains the logo rows and is animated vertically. */}
         <div className="logo-slider">
           {/* Render the first two rows of logos. */}
-          {twoRows.map((row, rowIndex) => (
+          {visibleRows.map((row, rowIndex) => (
             <div key={rowIndex} className="logo-row">
               {row.map((logo, index) => (
                 <img
@@ -57,7 +52,7 @@ function LogoCaro() {
           ))}
 
           {/* Duplicate the same two rows to create the seamless looping effect for the animation. */}
-          {twoRows.map((row, rowIndex) => (
+          {visibleRows.map((row, rowIndex) => (
             <div key={`duplicate-${rowIndex}`} className="logo-row">
               {row.map((logo, index) => (
                 <img

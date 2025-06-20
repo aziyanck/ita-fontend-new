@@ -19,6 +19,7 @@
     "lucide-react": "^0.515.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-responsive": "^10.0.1",
     "react-router-dom": "^7.6.2",
     "react-toggle-dark-mode": "^1.1.1",
     "styled-components": "^6.1.19",
