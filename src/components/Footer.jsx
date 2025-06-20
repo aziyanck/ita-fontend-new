@@ -27,18 +27,17 @@ function Footer() {
                 <div className="col-span-1">
                     <h3 className="text-lg font-semibold mb-4">Contact</h3>
                     <ul className="space-y-2 text-gray-400 text-sm">
-                        <li><i className="fa-solid fa-phone"></i> 9999 9999 99</li>
-                        <li><i className="fa-solid fa-envelope"></i> hxkxbmabh.com</li>
-                        <li><i className="fa-solid fa-location-dot"></i> Moonrumavadi</li>
+                        <li><i className="fa-solid fa-phone"></i> +91-9500817178</li>
+                        <li><i className="fa-solid fa-envelope"></i> industechautomations@gmail.com</li>
+                        <li><i className="fa-solid fa-location-dot"></i>  636/2, GR Nagar Iyer bungalow to, Main Rd, Moondrumavadi, Madurai, Tamil Nadu 625007</li>
                     </ul>
                 </div>
-
                 <div className="col-span-1">
                     <h3 className="text-lg font-semibold mb-4">Business Hours</h3>
                     <ul className="space-y-2 text-gray-400 text-sm">
-                        <li>Monday - Friday: 8:00 AM - 6:00 PM</li>
-                        <li>Saturday: 9:00 AM - 4:00 PM</li>
-                        <li>Sunday: Emergency calls only</li>
+                        <li>Monday - Friday: 9:00 AM - 9:00 PM</li>
+                        <li>Saturday: 9:00 AM - 9:00 PM</li>
+                        <li>Sunday: 9:00 AM - 9:00 PM</li>
                         <li>24/7 Emergency Support</li>
                     </ul>
                 </div>

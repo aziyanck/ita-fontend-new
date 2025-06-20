@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Loader from "../components/animations/Loader"
 
 import TestimonialCard from '../components/sub_comp/TestimonialCard';
-import testimonialData from '../components/sub_comp/testimonial_data';
+//import testimonialData from '../components/sub_comp/testimonial_data';
 import getCombinedReviews from '../components/sub_comp/combined_review';
 
 function Review() {
@@ -28,12 +28,12 @@ function Review() {
             <div data-aos="fade-up" className="connect w-screen bg-blue-100 group-[.dark-mode]:bg-[#313131]/30 h-[auto] flex flex-col justify-center items-center gap-8">
                 <h1 className="text-3xl poppins-extrabold gd-text p-4">Connect With Us</h1>
                 <div className=" text-st w-screen md:h-[auto] pb-10 flex justify-center flex-wrap items-center gap-15 text-3xl ">
-                    <a href="" className='hover:text-blue-400 hover-s-up'><i className="fa-brands fa-linkedin-in"></i></a>
-                    <a href="" className='hover:text-pink-600 hover-s-up'><i className="fa-brands fa-instagram"></i></a>
-                    <a href="" className='hover:text-blue-600 hover-s-up'><i className="fa-brands fa-facebook-f"></i></a>
-                    <a href="" className='hover:text-green-500 hover-s-up'><i className="fa-brands fa-whatsapp"></i></a>
-                    <a href="" className='hover:text-red-600 hover-s-up'><i className="fa-solid fa-envelope"></i></a>
-                    <a href="tel:9447673262" className='hover:text-blue-500 hover-s-up'><i className="fa-solid fa-phone-volume"></i></a>
+                    <a href="https://www.linkedin.com/company/industech-automations/" target='_blank' className='hover:text-blue-400 hover-s-up'><i className="fa-brands fa-linkedin-in"></i></a>
+                    <a href="https://www.instagram.com/industech_automations" target='_blank' className='hover:text-pink-600 hover-s-up'><i className="fa-brands fa-instagram"></i></a>
+                    <a href="https://www.facebook.com/IndustechAutomations" target='_blank' className='hover:text-blue-600 hover-s-up'><i className="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://wa.me/919500817178" target='_blank' className='hover:text-green-500 hover-s-up'><i className="fa-brands fa-whatsapp"></i></a>
+                    <a href="mailto:industechautomations@gmail.com" target='_blank' className='hover:text-red-600 hover-s-up'><i className="fa-solid fa-envelope"></i></a>
+                    <a href="tel:9500817178" className='hover:text-blue-500 hover-s-up'><i className="fa-solid fa-phone-volume"></i></a>
                 </div>
             </div>
 
