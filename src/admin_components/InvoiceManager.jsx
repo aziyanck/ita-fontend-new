@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import 
 
 // Main component that manages both the form and the preview state.
 function InvoiceManager() {
