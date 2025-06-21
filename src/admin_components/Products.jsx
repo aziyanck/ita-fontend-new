@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import supabaseService from './supabase';
+import { div } from 'framer-motion/client';
 
 const getAll = supabaseService.getAll;
 const addProduct = supabaseService.addProduct;
@@ -60,7 +61,8 @@ const SalesTable = () => {
     }, []);
 
     return (
-        <div className="p-6 bg-white rounded-2xl shadow-lg max-w-screen overflow-x-clip font-sans">
+        <div className="flex justify-center items-center w-full max-w-screen">
+            <div className="p-6 bg-white w-full  max-w-screen h-full overflow-x-clip font-sans">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-3xl font-bold text-gray-800">Products</h2>
                 <button
@@ -112,6 +114,7 @@ const SalesTable = () => {
                     </tbody>
                 </table>
             </div>
+        </div>
         </div>
     );
 };

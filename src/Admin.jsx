@@ -30,7 +30,7 @@ const Sidebar = ({ activeComponent, setActiveComponent, isOpen, setIsOpen }) => 
     ];
 
     return (
-        <aside className={`bg-gray-800 text-white fixed inset-y-0 left-0 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out w-64 z-30`}>
+        <aside className={`bg-gray-800 text-white h-auto fixed inset-y-0 left-0 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out w-64 z-30`}>
             <div className="p-4 flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Admin Panel</h2>
                 <button onClick={() => setIsOpen(false)} className="md:hidden text-white">
@@ -89,7 +89,7 @@ const MainContent = ({ activeComponent }) => {
                 return <Dashboard />;
         }
     };
-    return <main className="flex-1 justify-center items-center p-4 bg-gray-100 w-screen md:w-auto">{renderComponent()}</main>;
+    return <main className="flex   h-auto ">{renderComponent()}</main>;
 };
 
 // --- The Main App Component ---
@@ -99,7 +99,7 @@ export default function Admin() {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <div className="h-screen w-screen flex bg-gray-100 font-sans">
+        <div className="h-auto min-h-screen w-screen flex bg-gray-100 font-sans">
             <Sidebar
                 activeComponent={activeComponent}
                 setActiveComponent={setActiveComponent}
@@ -107,7 +107,7 @@ export default function Admin() {
                 setIsOpen={setSidebarOpen}
             />
             {isSidebarOpen && <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black opacity-50 z-20 md:hidden"></div>}
-            <div className="flex-1 flex flex-col h-screen">
+            <div className="flex-1 flex flex-col  h-auto">
                 <Navbar setIsOpen={setSidebarOpen} />
                 <MainContent activeComponent={activeComponent} />
             </div>
