@@ -288,8 +288,8 @@ const Form = () => {
     </div>
   ) : (
 
-    <div className="w-screen md:w-full bg-red-500 flex justify-center items-center">
-      <form onSubmit={handleSubmit} className="flex flex-col scale-90 md:scale-100 gap-4 text-gray-700 w-screen md:max-w-xl  p-4 md:p-8 bg-white shadow-lg rounded-lg lg:max-w-4xl  my-8 font-sans">
+    <div className="w-screen md:w-full  flex justify-center items-start ">
+      <form onSubmit={handleSubmit} className="flex flex-col  md:scale-100 gap-4 text-gray-700 w-screen md:max-w-xl  p-4 md:p-8 bg-white shadow-lg rounded-lg lg:max-w-4xl  my-8 font-sans">
         <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">Create Quotation</h2>
 
         <input

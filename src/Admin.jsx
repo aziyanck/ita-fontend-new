@@ -89,7 +89,7 @@ const MainContent = ({ activeComponent }) => {
                 return <Dashboard />;
         }
     };
-    return <main className="flex   h-auto ">{renderComponent()}</main>;
+    return <main className="flex h-auto ">{renderComponent()}</main>;
 };
 
 // --- The Main App Component ---
