@@ -112,7 +112,7 @@ const MainContent = ({ activeComponent }) => {
                 return <Dashboard />;
         }
     };
-    return <main className="flex-1 p-4 bg-gray-100 overflow-y-auto">{renderComponent()}</main>;
+    return <main className="flex-1 justify-center items-center p-4 bg-gray-100 w-screen md:w-auto">{renderComponent()}</main>;
 };
 
 // --- The Main App Component ---
