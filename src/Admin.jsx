@@ -14,27 +14,10 @@ import Products from './admin_components/Products'
 // These components would typically be in their own files.
 
 
-const UsersManagement = () => (
-    <div className="p-6">
-        <h1 className="text-3xl font-bold text-gray-800">Users</h1>
-        <p className="mt-2 text-gray-600">Manage all registered users.</p>
-        {/* You would map over user data and render a table or list here */}
-        <div className="mt-8 bg-white p-4 rounded-lg shadow-md">
-            <p className="text-gray-700">User list would appear here.</p>
-        </div>
-    </div>
-);
 
 
-const SettingsP = () => (
-    <div className="p-6">
-        <h1 className="text-3xl font-bold text-gray-800">Settings</h1>
-        <p className="mt-2 text-gray-600">Configure your application settings.</p>
-         <div className="mt-8 bg-white p-4 rounded-lg shadow-md">
-             <p className="text-gray-700">Settings form would appear here.</p>
-        </div>
-    </div>
-);
+
+
 
 
 // --- Main Layout Components ---
@@ -42,8 +25,6 @@ const SettingsP = () => (
 const Sidebar = ({ activeComponent, setActiveComponent, isOpen, setIsOpen }) => {
     const navItems = [
         { name: 'Dashboard', icon: LayoutDashboard, component: 'Dashboard' },
-        { name: 'Users', icon: Users, component: 'Users' },
-        { name: 'Settings', icon: Settings, component: 'Settings' },
         { name: 'Generate Quotation', icon: Newspaper, component: 'Generate Quotation' },
         { name: 'Products', icon: ShoppingCart, component: 'Products' }
     ];
@@ -100,10 +81,6 @@ const MainContent = ({ activeComponent }) => {
         switch (activeComponent) {
             case 'Dashboard':
                 return <Dashboard />;
-            case 'Users':
-                return <UsersManagement />;
-            case 'Settings':
-                return <SettingsP />;
             case 'Generate Quotation':
                 return <GenerateQuotation />;
             case 'Products':
