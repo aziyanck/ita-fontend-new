@@ -4,6 +4,8 @@ import { LayoutDashboard, Users, ShoppingCart, Settings, Menu, X , Newspaper } f
 
 import Dashboard from './admin_components/Dashbord'
 import GenerateQuotation from './admin_components/GenerateQuotation'
+import Products from './admin_components/Products'
+
 
 
 
@@ -23,15 +25,6 @@ const UsersManagement = () => (
     </div>
 );
 
-const ProductsManagement = () => (
-    <div className="p-6">
-        <h1 className="text-3xl font-bold text-gray-800">Products</h1>
-        <p className="mt-2 text-gray-600">Add, edit, and remove products.</p>
-        <div className="mt-8 bg-white p-4 rounded-lg shadow-md">
-             <p className="text-gray-700">Product management interface would appear here.</p>
-        </div>
-    </div>
-);
 
 const SettingsP = () => (
     <div className="p-6">
@@ -50,9 +43,9 @@ const Sidebar = ({ activeComponent, setActiveComponent, isOpen, setIsOpen }) => 
     const navItems = [
         { name: 'Dashboard', icon: LayoutDashboard, component: 'Dashboard' },
         { name: 'Users', icon: Users, component: 'Users' },
-        { name: 'Products', icon: ShoppingCart, component: 'Products' },
         { name: 'Settings', icon: Settings, component: 'Settings' },
-        { name: 'Generate Quotation', icon: Newspaper, component: 'Generate Quotation' }
+        { name: 'Generate Quotation', icon: Newspaper, component: 'Generate Quotation' },
+        { name: 'Products', icon: ShoppingCart, component: 'Products' }
     ];
 
     return (
@@ -109,12 +102,12 @@ const MainContent = ({ activeComponent }) => {
                 return <Dashboard />;
             case 'Users':
                 return <UsersManagement />;
-            case 'Products':
-                return <ProductsManagement />;
             case 'Settings':
                 return <SettingsP />;
             case 'Generate Quotation':
                 return <GenerateQuotation />;
+            case 'Products':
+                return <Products />;
             default:
                 return <Dashboard />;
         }
