@@ -5,6 +5,7 @@ import { LayoutDashboard, Users, ShoppingCart, Settings, Menu, X , Newspaper } f
 import Dashboard from './admin_components/Dashbord'
 import GenerateQuotation from './admin_components/GenerateQuotation'
 import Products from './admin_components/Products'
+import InvoiceGenerator from './admin_components/InvoiceManager'
 
 
 
@@ -26,7 +27,8 @@ const Sidebar = ({ activeComponent, setActiveComponent, isOpen, setIsOpen }) => 
     const navItems = [
         { name: 'Dashboard', icon: LayoutDashboard, component: 'Dashboard' },
         { name: 'Generate Quotation', icon: Newspaper, component: 'Generate Quotation' },
-        { name: 'Products', icon: ShoppingCart, component: 'Products' }
+        { name: 'Products', icon: ShoppingCart, component: 'Products' },
+        {name: 'Generate Invoice', icon: Newspaper, component: 'Generate Invoice'}
     ];
 
     return (
@@ -85,6 +87,8 @@ const MainContent = ({ activeComponent }) => {
                 return <GenerateQuotation />;
             case 'Products':
                 return <Products />;
+            case 'Generate Invoice':
+                return <InvoiceGenerator />;
             default:
                 return <Dashboard />;
         }
