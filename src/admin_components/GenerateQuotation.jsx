@@ -163,7 +163,7 @@ const Form = () => {
     messageBox.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
     messageBox.innerHTML = `
       <div class="bg-white p-6 rounded-lg shadow-xl text-center flex flex-col items-center">
-        <p class="text-xl font-semibold mb-4">${message}</p>
+        <p class="text-xl text-gray-700 font-semibold mb-4">${message}</p>
         <button id="close-message" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Close</button>
       </div>
     `;
@@ -287,7 +287,7 @@ const Form = () => {
       </div>
     </div>
   ) : (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-gray-700  p-4 md:p-8 bg-white shadow-lg rounded-lg max-w-2xl mx-auto my-8 font-sans">
+    <form onSubmit={handleSubmit} className="flex flex-col scale-90 md:scale-100 gap-4 text-gray-700 w-screen  p-4 md:p-8 bg-white shadow-lg rounded-lg max-w-2xl mx-auto my-8 font-sans">
       <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">Create Quotation</h2>
 
       <input

@@ -1,6 +1,6 @@
 export default function Dashboard() {
     return (
-        <div className="p-6">
+        <div className="">
             <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
             <p className="mt-2 text-gray-600">Welcome to your admin dashboard.</p>
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

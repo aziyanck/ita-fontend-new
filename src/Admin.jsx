@@ -5,6 +5,9 @@ import { LayoutDashboard, Users, ShoppingCart, Settings, Menu, X , Newspaper } f
 import Dashboard from './admin_components/Dashbord'
 import GenerateQuotation from './admin_components/GenerateQuotation'
 
+
+
+
 // --- Placeholder Components for Main Content ---
 // These components would typically be in their own files.
 
@@ -87,7 +90,7 @@ const Sidebar = ({ activeComponent, setActiveComponent, isOpen, setIsOpen }) => 
 };
 
 const Navbar = ({ setIsOpen }) => (
-    <header className="bg-white shadow-md p-4 flex justify-between items-center z-20">
+    <header className="bg-white shadow-md p-4 w-screen md:w-auto flex justify-between items-center z-20">
         <button onClick={() => setIsOpen(true)} className="md:hidden text-gray-600">
             <Menu size={24} />
         </button>
@@ -126,7 +129,7 @@ export default function Admin() {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <div className="h-screen flex bg-gray-100 font-sans">
+        <div className="h-screen w-screen flex bg-gray-100 font-sans">
             <Sidebar
                 activeComponent={activeComponent}
                 setActiveComponent={setActiveComponent}
