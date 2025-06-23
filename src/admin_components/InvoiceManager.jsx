@@ -32,7 +32,7 @@ function InvoiceManager() {
       number: "",
       date: new Date().toISOString().slice(0, 10),
       items: [
-        { id: Date.now(), name: "", hsn: "", qty: 1, unitPrice: 0, taxRate: 18, discount: 0 }
+        { id: Date.now(), name: "", hsn: "", qty: "", unitPrice: "", taxRate: "", discount: "" }
       ],
       notes: "",
       declaration: "We declare this invoice reflects correct and actual transaction details."
@@ -118,7 +118,7 @@ function InvoiceManager() {
         ...prev.invoice,
         items: [
           ...prev.invoice.items,
-          { id: Date.now(), name: "", hsn: "", qty: 1, unitPrice: 0, taxRate: 18, discount: 0 }
+          { id: Date.now(), name: "", hsn: "", qty: "", unitPrice: "", taxRate: "", discount: "" }
         ]
       }
     }));
@@ -188,7 +188,7 @@ function InvoiceManager() {
     };
 
     showMessageBox(`Submitting job for Invoice #${invoiceData.invoice.number}...`);
-    const API_URL = "http://localhost:3001/geninvoice"; 
+    const API_URL = "https://jobqueue.onrender.com/geninvoice"; 
     console.log("Submitting to backend:", JSON.stringify(payload, null, 2));
 
     try {
@@ -241,7 +241,7 @@ function InvoiceManager() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6 text-gray-700 w-full p-4 md:p-8 bg-white shadow-lg rounded-lg max-w-5xl mx-auto my-8 font-sans">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6 text-gray-700 w-full p-4 md:p-8 bg-white shadow-lg rounded-lg max-w-6xl mx-auto my-8 font-sans">
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Create Invoice</h2>
       
       {/* Company Details Section */}
