@@ -212,7 +212,7 @@ function InvoiceManager() {
 
   if (isPreview) {
     return (
-      <div className="flex flex-col items-center p-4 bg-gray-600 w-full max-w-screen min-h-screen font-sans">
+      <div className="flex flex-col items-center p-4 bg-gray-100 w-full max-w-screen min-h-screen font-sans">
         <div className="bg-white overflow-x-scroll w-screen p-8 rounded-lg shadow-md w-full max-w-4xl">
           <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Invoice Preview</h2>
           <div className="flex justify-between mb-8"><h4 className="font-bold text-gray-700 mb-2">To: {invoiceData.customer.name}</h4><h4 className="font-bold text-gray-700 mb-2">Invoice: #{invoiceData.invoice.number}</h4></div>
@@ -245,7 +245,7 @@ function InvoiceManager() {
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Create Invoice</h2>
       
       {/* Company Details Section */}
-      <div className="space-y-4 p-4 border border-gray-200 rounded-lg">
+      <div className="space-y-4 p-4 border bg-gray-100 border-gray-200 rounded-lg">
         <h3 className="text-xl font-semibold text-gray-800">Your Company Details</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input className="px-3 py-2 border border-gray-300 rounded-md" placeholder="Company Name" value={invoiceData.company.name} onChange={(e) => handleNestedChange('company', 'name', e.target.value)}/>
