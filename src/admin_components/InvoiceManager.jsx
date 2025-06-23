@@ -212,11 +212,11 @@ function InvoiceManager() {
 
   if (isPreview) {
     return (
-      <div className="flex flex-col items-center p-4 bg-gray-100 min-h-screen font-sans">
-        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-4xl">
+      <div className="flex flex-col items-center p-4 bg-gray-600 w-full max-w-screen min-h-screen font-sans">
+        <div className="bg-white overflow-x-scroll w-screen p-8 rounded-lg shadow-md w-full max-w-4xl">
           <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Invoice Preview</h2>
           <div className="flex justify-between mb-8"><h4 className="font-bold text-gray-700 mb-2">To: {invoiceData.customer.name}</h4><h4 className="font-bold text-gray-700 mb-2">Invoice: #{invoiceData.invoice.number}</h4></div>
-          <div className="overflow-x-auto mb-8">
+          <div className="overflow-x-scroll mb-8">
             <table className="min-w-full bg-white border border-gray-300 rounded-md">
               <thead className="bg-gray-100"><tr className="text-left text-sm font-medium text-gray-600 uppercase tracking-wider"><th className="py-3 px-4 border-b">#</th><th className="py-3 px-4 border-b">Item</th><th className="py-3 px-4 border-b text-right">Qty</th><th className="py-3 px-4 border-b text-right">Price</th><th className="py-3 px-4 border-b text-right">Discount (%)</th><th className="py-3 px-4 border-b text-right">Total</th></tr></thead>
               <tbody>
@@ -241,7 +241,7 @@ function InvoiceManager() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6 text-gray-700 w-full p-4 md:p-8 bg-white shadow-lg rounded-lg max-w-4xl mx-auto my-8 font-sans">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6 text-gray-700 w-full p-4 md:p-8 bg-white shadow-lg rounded-lg max-w-5xl mx-auto my-8 font-sans">
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Create Invoice</h2>
       
       {/* Company Details Section */}
@@ -291,14 +291,14 @@ function InvoiceManager() {
             const finalAmount = itemTotal - discountAmount;
             return (
               <div key={item.id} className="grid grid-cols-12 gap-2 items-center p-2 border-b border-gray-200 last:border-b-0">
-                <div className="col-span-1 text-center font-medium">{i + 1}</div>
-                <input className="col-span-3 px-3 py-2 border border-gray-300 rounded-md" placeholder="Item/Service Description" value={item.name} onChange={e => handleItemChange(i, 'name', e.target.value)}/>
-                <input className="col-span-2 px-3 py-2 border border-gray-300 rounded-md" placeholder="HSN" value={item.hsn} onChange={e => handleItemChange(i, 'hsn', e.target.value)}/>
-                <input type="number" className="col-span-1 px-3 py-2 border border-gray-300 rounded-md" placeholder="Qty" value={item.qty} onChange={e => handleItemChange(i, 'qty', e.target.value)}/>
-                <input type="number" className="col-span-1 px-3 py-2 border border-gray-300 rounded-md" placeholder="Price" value={item.unitPrice} onChange={e => handleItemChange(i, 'unitPrice', e.target.value)}/>
-                <input type="number" className="col-span-2 px-3 py-2 border border-gray-300 rounded-md" placeholder="Discount (%)" value={item.discount} onChange={e => handleItemChange(i, 'discount', e.target.value)}/>
-                <input className="col-span-1 px-3 py-2 border bg-gray-100 border-gray-300 rounded-md text-right" value={`₹${finalAmount.toFixed(2)}`} disabled />
-                <button type="button" onClick={() => removeItem(i)} className="col-span-1 px-2 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">X</button>
+                <div className="col-span-2 md:col-span-1 text-center font-medium">{i + 1}</div>
+                <input className="col-span-10 md:col-span-3 px-3 py-2 border border-gray-300 rounded-md" placeholder="Item/Service Description" value={item.name} onChange={e => handleItemChange(i, 'name', e.target.value)}/>
+                <input className="col-span-12 md:col-span-2 px-3 py-2 border border-gray-300 rounded-md" placeholder="HSN" value={item.hsn} onChange={e => handleItemChange(i, 'hsn', e.target.value)}/>
+                <input type="number" className="col-span-3 md:col-span-1 px-3 py-2 border border-gray-300 rounded-md" placeholder="Qty" value={item.qty} onChange={e => handleItemChange(i, 'qty', e.target.value)}/>
+                <input type="number" className="col-span-3 md:col-span-1 px-3 py-2 border border-gray-300 rounded-md" placeholder="Price" value={item.unitPrice} onChange={e => handleItemChange(i, 'unitPrice', e.target.value)}/>
+                <input type="number" className="col-span-3 md:col-span-2 px-3 py-2 border border-gray-300 rounded-md" placeholder="Discount (%)" value={item.discount} onChange={e => handleItemChange(i, 'discount', e.target.value)}/>
+                <input className="col-span-3 md:col-span-1 px-3 py-2 border bg-gray-100 border-gray-300 rounded-md text-right" value={`₹${finalAmount.toFixed(2)}`} disabled />
+                <button type="button" onClick={() => removeItem(i)} className="col-span-2 md:col-span-1 px-2 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">X</button>
               </div>
             )
         })}
