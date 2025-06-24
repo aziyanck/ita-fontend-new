@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 
 // Main App Component
 
 // Login Component
 const LoginComponent = () => {
+
+  const navigate = useNavigate();
+
   // State to manage password visibility
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState('');
@@ -18,22 +23,25 @@ const LoginComponent = () => {
   };
 
   // Handle form submission
-  const handleLogin = (e) => {
-    e.preventDefault();
+ const handleLogin = (e) => {
+  e.preventDefault(); // prevent page refresh
+
+  // Simulate validation or API login logic
+  if (email === 'admin@example.com' && password === '123456') {
+    // optional: set success message
+    setSuccess('Login successful!');
     setError('');
+
+    // Delay navigation just for UX (optional)
+    setTimeout(() => {
+      navigate('/admin'); // 👈 redirect to /admin after login
+    }, 500);
+  } else {
+    setError('Invalid credentials');
     setSuccess('');
+  }
+};
 
-    // Basic validation
-    if (!email || !password) {
-      setError('Please enter both email/username and password.');
-      return;
-    }
-
-    // Mock login logic
-    console.log('Logging in with:', { email, password });
-    setSuccess('Login successful! Redirecting...');
-    // Here you would typically handle authentication, e.g., call an API
-  };
 
 
   return (
@@ -45,7 +53,7 @@ const LoginComponent = () => {
         </div>
 
         {/* Login Form */}
-        <form className="space-y-6" onSubmit={handleLogin}>
+        <form className="space-y-6" onSubmit={handleLogin} >
           {/* Email Input */}
           <div className="relative">
             <div className="absolute top-1/2 -translate-y-1/2 left-3 text-gray-400">
@@ -99,6 +107,7 @@ const LoginComponent = () => {
           <button
             type="submit"
             className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 transform hover:-translate-y-1 transition-all duration-300"
+
           >
             Login
           </button>

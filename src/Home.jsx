@@ -1,4 +1,6 @@
 // Home.jsx
+import AOS from "aos";
+import "aos/dist/aos.css";
 import ScrollDiv from './components/ScrollDiv';
 import Navbar from './components/Navbar';
 import featuresData from './components/sub_comp/features_data';
@@ -26,6 +28,15 @@ function Home() {
     import('./components/Review');
     import('./components/Footer');
   }, []);
+
+
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      once: true,
+    });
+  }, []);
+
 
   return (
     <div className="overflow-x-clip">

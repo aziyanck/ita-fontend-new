@@ -29,12 +29,12 @@ function LogoCaro() {
       <h1 className="text-2xl md:text-3xl font-extrabold gd-text poppins-extrabold mt-8 mb-2 text-center">
         Connected Experiences
       </h1>
-      <p className="text-center text-base font-medium text-gray-600 dark:text-gray-300 max-w-4xl mb-8 px-4">
+      <p className="text-center text-base font-medium light-text-vl dark-text-l max-w-4xl mb-8 px-4">
         Our flexible platform can integrate diverse products from leading manufacturers.
       </p>
 
       {/* The main container for the logo carousel. It has a fixed height and hides overflow. */}
-      <div className="logo-box" style={{ height: `${totalHeight}px` }}>
+      <div className="logo-box bg-blue-100 group-[.dark-mode]:bg-[#313131]/30" style={{ height: `${totalHeight}px` }}>
         {/* The slider contains the logo rows and is animated vertically. */}
         <div className="logo-slider">
           {/* Render the first two rows of logos. */}
