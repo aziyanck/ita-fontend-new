@@ -42,6 +42,9 @@ function InvoiceManager() {
 
   // State to toggle between the form and the preview view.
   const [isPreview, setIsPreview] = useState(false);
+
+  // State to display status of operations --> null | "pending" | "success"
+  const [generationStatus, setGenerationStatus] = useState(null); 
   
   // --- Helper Functions & Calculations ---
 
@@ -166,6 +169,8 @@ function InvoiceManager() {
   };
 
   const handleGenerateInvoice = async () => {
+    setGenerationStatus("pending")
+
     // Convert string values from the form to numbers before sending.
     const processedItems = invoiceData.invoice.items.map(item => ({
       ...item,
@@ -187,7 +192,8 @@ function InvoiceManager() {
       Installation: parseFloat(invoiceData.installationCharge) || 0
     };
 
-    showMessageBox(`Submitting job for Invoice #${invoiceData.invoice.number}...`);
+    //showMessageBox(`Submitting job for Invoice #${invoiceData.invoice.number}...`);
+
     const API_URL = "https://jobqueue.onrender.com/geninvoice"; 
     console.log("Submitting to backend:", JSON.stringify(payload, null, 2));
 
@@ -197,13 +203,16 @@ function InvoiceManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
       const result = await response.json(); 
       if (!response.ok) {
         throw new Error(result.status || "Request failed");
       }
-      showMessageBox(result.status || `Successfully submitted job.`);
+      setGenerationStatus("success")
+      //showMessageBox(result.status || `Successfully submitted job.`);
     } catch (error) {
       console.error("Error submitting invoice job:", error);
+      setGenerationStatus(null)
       showMessageBox(`Error: ${error.message}. Check console for details.`);
     }
   };
@@ -234,6 +243,17 @@ function InvoiceManager() {
             </table>
           </div>
           <div className="flex justify-end mb-8"><div className="w-full max-w-xs text-gray-700"><div className="flex justify-between py-1"><span>Subtotal</span><span>₹{totals.subtotal.toFixed(2)}</span></div><div className="flex justify-between py-1"><span>Installation</span><span>₹{totals.installation.toFixed(2)}</span></div><div className="flex justify-between py-1"><span>GST (18% - Preview)</span><span>₹{totals.tax.toFixed(2)}</span></div><div className="flex justify-between py-2 border-t-2 border-gray-300 mt-2"><span className="font-bold text-lg">Total</span><span className="font-bold text-lg">₹{totals.total.toFixed(2)}</span></div></div></div>
+          {generationStatus === "pending" && (
+  <p className="text-center mb-4 text-yellow-600 font-medium">
+    Generating PDF...
+  </p>
+)}
+{generationStatus === "success" && (
+  <p className="text-center mb-4 text-green-600 font-medium">
+    Completed.
+  </p>
+)}
+
           <div className="flex justify-center space-x-4"><button onClick={handleGenerateInvoice} className="submit-button bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-md shadow-md">Submit for PDF Generation</button><button onClick={handleEdit} className="edit-button bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-md shadow-md">Edit Details</button></div>
         </div>
       </div>
