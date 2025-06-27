@@ -1,370 +1,349 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import supabaseServices from './supabaseServices';
-import ProductsBulk from './products_bulk';
-import FilterProducts from './filterproducts'; // Ensure the path is correct if your file is named 'filterproducts.jsx'
-import * as XLSX from 'xlsx'; // For Excel export
+import ProductsBulk from './products_bulk'; // Assuming this component is still relevant for old data or other bulk ops
+import * as XLSX from 'xlsx'; // Assuming you still need this for download logic
 
-const { getAll, addPurchase, updatePurchase, deletePurchase } = supabaseServices;
+// Destructure the relevant functions.
+const {
+  addPurchaseMaster,
+  getPurchaseMasters,
+  addPurchaseItems,
+  getPurchaseItemsByInvoice
+} = supabaseServices;
+
+// --- Helper component to display invoice details ---
+const InvoiceDetails = ({ invoiceNo, onClose }) => {
+  const [masterData, setMasterData] = useState(null);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchInvoiceDetails = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Fetch master details from 'purchase_masters' (plural)
+        const { data: masterInfo, error: masterError } = await supabaseServices.client
+            .from('purchase_masters') // Correct table name
+            .select('*')
+            .eq('invoice_no', invoiceNo)
+            .single();
+
+        if (masterError) {
+            throw new Error(`Error fetching master for ${invoiceNo}: ${masterError.message}`);
+        }
+        setMasterData(masterInfo);
+
+        const itemsData = await getPurchaseItemsByInvoice(invoiceNo);
+        setItems(itemsData);
+      } catch (err) {
+        console.error("Error fetching invoice details:", err);
+        setError(err.message || "Failed to load invoice details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (invoiceNo) {
+      fetchInvoiceDetails();
+    }
+  }, [invoiceNo]);
+
+  if (loading) return <div className="text-center p-4">Loading invoice details...</div>;
+  if (error) return <div className="text-center p-4 text-red-600">Error: {error}</div>;
+  if (!masterData) return <div className="text-center p-4">Invoice not found.</div>;
+
+  return (
+    <div className="p-6 bg-white border border-gray-300 rounded-lg shadow-md text-gray-800 space-y-4">
+      <h3 className="text-2xl font-semibold mb-4">Invoice Details: {masterData.invoice_no}</h3>
+      {/* Accessing 'date' column as per your database screenshot */}
+      <p><strong>Date:</strong> {formatDate(masterData.date)}</p>
+      <p><strong>Distributor:</strong> {masterData.distributor}</p>
+
+      <h4 className="text-lg font-semibold mt-6 mb-2">Materials for this Invoice</h4>
+      {items.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="w-full border rounded text-sm">
+            <thead className="bg-gray-100 text-gray-800 font-semibold border-b border-gray-300">
+              <tr>
+                <th className="px-3 py-2 text-left">Serial No</th>
+                <th className="px-3 py-2 text-left">Product Name</th>
+                <th className="px-3 py-2 text-left">HSN</th>
+                <th className="px-3 py-2 text-left">Brand</th>
+                <th className="px-3 py-2 text-left">Quantity</th>
+                <th className="px-3 py-2 text-left">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item) => (
+                <tr key={item.id} className="border-t bg-white">
+                  <td className="px-3 py-2">{item.serial_no || '-'}</td>
+                  <td className="px-3 py-2">{item.product_name}</td>
+                  <td className="px-3 py-2">{item.hsn || '-'}</td>
+                  <td className="px-3 py-2">{item.brand || '-'}</td>
+                  <td className="px-3 py-2">{item.quantity}</td> {/* Quantity is text in DB */}
+                  <td className="px-3 py-2">{item.amount}</td> {/* Amount is float8 in DB */}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p>No materials found for this invoice.</p>
+      )}
+
+      <div className="flex justify-end mt-6">
+        <button onClick={onClose} className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md">Close</button>
+      </div>
+    </div>
+  );
+};
+
 
 function SalesTable() {
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]); // New state for filtered products
   const [showPurchaseForm, setShowPurchaseForm] = useState(false);
   const [showBulkForm, setShowBulkForm] = useState(false);
-  const [editPurchase, setEditPurchase] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  // Removed the extra 'CONST' here which was causing a syntax error
+  const [invoices, setInvoices] = useState([]);
+  const [selectedInvoiceNo, setSelectedInvoiceNo] = useState(null);
 
-  const fetchProducts = async () => {
-    setLoading(true);
-    setError('');
+  const fetchInvoices = async () => {
     try {
-      const initialSalesData = await getAll();
-      if (initialSalesData) {
-        setProducts(initialSalesData);
-        setFilteredProducts(initialSalesData); // Initially, all products are filtered
-      }
+      // Use the getPurchaseMasters function, which selects 'date'
+      const data = await getPurchaseMasters();
+      if (data) setInvoices(data);
     } catch (err) {
-      setError('Failed to fetch purchases');
-      console.error(err);
-    } finally {
-      setLoading(false);
+      console.error("Fetch invoices error:", err);
     }
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchInvoices();
   }, []);
 
-  // Callback to receive filtered data from FilterProducts component
-  const handleFilteredData = useCallback((data) => {
-    setFilteredProducts(data);
-  }, []);
-
-  const handleEdit = (item) => {
-    setEditPurchase(item);
-    setShowPurchaseForm(true);
-    setShowBulkForm(false);
+  const formatDate = (isoDate) => {
+    if (!isoDate || typeof isoDate !== 'string') return isoDate;
+    // Check if it's already in DD/MM/YYYY format or a valid date
+    if (isoDate.includes('/') && isoDate.split('/').length === 3) return isoDate;
+    try {
+      const dateObj = new Date(isoDate);
+      if (isNaN(dateObj)) return isoDate; // Invalid date string
+      const day = String(dateObj.getDate()).padStart(2, '0');
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+      const year = dateObj.getFullYear();
+      return `${day}/${month}/${year}`;
+    } catch (e) {
+      console.error("Error formatting date:", isoDate, e);
+      return isoDate;
+    }
   };
 
-  const handleDelete = async (id) => {
-    if (!id || typeof id !== 'string' || id.length < 10) {
-      alert("Invalid ID. Cannot delete.");
-      console.warn("Blocked delete: invalid ID →", id);
+
+  const handleDownload = (format) => {
+    if (invoices.length === 0) {
+      alert("No data to download.");
       return;
     }
-
-    const confirmed = window.confirm('Are you sure you want to delete this purchase?');
-    if (!confirmed) return;
-
-    setLoading(true);
-    setError('');
-
-    try {
-      console.log('Attempting to delete ID:', id);
-      const result = await deletePurchase(id);
-      const isDeleteSuccessful = result !== null;
-      if (isDeleteSuccessful) {
-        setError('');
-        setTimeout(() => {
-          fetchProducts();
-        }, 500);
-      } else {
-        setError('Failed to delete purchase');
-      }
-    } catch (err) {
-      setError('Error deleting purchase');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    alert("Download functionality needs to be updated to handle master/item data separately or by joining.");
+   
   };
 
-  const PurchaseForm = ({ onClose, onSuccess, purchase }) => {
-    const [date, setDate] = useState(purchase ? purchase.date : new Date().toISOString().substr(0, 10));
-    const [invoiceNo, setInvoiceNo] = useState(purchase ? purchase.invoice_no : '');
-    const [productName, setProductName] = useState(purchase ? purchase.product_name : '');
-    const [distributor, setDistributor] = useState(purchase ? purchase.distributor : '');
-    const [hsn, setHsn] = useState(purchase ? purchase.hsn : '');
-    const [quantity, setQuantity] = useState(purchase ? purchase.quantity : '');
-    const [amount, setAmount] = useState(purchase ? purchase.amount : '');
+  const PurchaseForm = ({ onClose, onSuccess }) => {
+    // Initial date state as YYYY-MM-DD for input type="date"
+    const [date, setDate] = useState(new Date().toISOString().substr(0, 10));
+    const [invoiceNo, setInvoiceNo] = useState('');
+    const [distributor, setDistributor] = useState('');
+    const [materials, setMaterials] = useState([
+      { serialNo: '', productName: '', hsn: '', brand: '', quantity: '', amount: '' }
+    ]);
+
+    const handleMaterialChange = (index, field, value) => {
+      const updated = [...materials];
+      updated[index][field] = value;
+      setMaterials(updated);
+    };
+
+    const addMaterialRow = () => {
+      setMaterials([...materials, {
+        serialNo: '', productName: '', hsn: '', brand: '', quantity: '', amount: ''
+      }]);
+    };
+
+    const removeMaterialRow = (index) => {
+      const updated = materials.filter((_, i) => i !== index);
+      setMaterials(updated);
+    };
 
     const handleSubmit = async (e) => {
       e.preventDefault();
-      if (!productName || !distributor || !quantity || !amount || !invoiceNo || !hsn) {
-        alert("Please fill all fields");
+
+      if (!date || !invoiceNo || !distributor) {
+        alert('Please fill Date, Invoice No and Distributor');
         return;
       }
 
-      const newPurchase = {
-        date,
-        invoice_no: parseFloat(invoiceNo),
-        product_name: productName,
-        distributor,
-        hsn,
-        quantity: parseInt(quantity),
-        amount: parseFloat(amount),
-      };
+      const validMaterials = materials.filter(
+        (m) => m.productName && m.quantity !== '' && m.amount !== '' // Quantity can be '0' but not empty string
+      );
 
-      const result = purchase
-        ? await updatePurchase(purchase.id, newPurchase)
-        : await addPurchase(newPurchase);
+      if (validMaterials.length === 0) {
+        alert('Please add at least one valid material with Product Name, Quantity, and Amount.');
+        return;
+      }
 
-      if (result) {
-        onSuccess();
-        onClose();
-      } else {
-        alert("Failed to save purchase");
+      try {
+        // Step 1: Insert into purchase_masters
+        const masterDataToInsert = {
+          date: date, // <--- IMPORTANT: Using 'date' as per DB schema
+          invoice_no: invoiceNo,
+          distributor: distributor
+        };
+        const insertedMaster = await addPurchaseMaster(masterDataToInsert);
+
+        // Step 2: Prepare and insert into purchase_items
+        const itemsDataToInsert = validMaterials.map((m) => ({
+          invoice_no: invoiceNo, // Link using invoice_no
+          serial_no: m.serialNo || null,
+          product_name: m.productName,
+          hsn: m.hsn || null,
+          brand: m.brand || null,
+          quantity: m.quantity, // <--- IMPORTANT: Quantity is TEXT in DB, send as string
+          amount: parseFloat(m.amount) // Amount is float8, so parse it
+        }));
+
+        await addPurchaseItems(itemsDataToInsert);
+
+        alert("Purchase saved successfully!");
+        onSuccess(); // Re-fetch master invoices for dashboard update
+        onClose();   // Close the form
+      } catch (error) {
+        // Handle specific errors (e.g., unique constraint violation for invoice_no)
+        if (error.code === '23505') { // PostgreSQL unique violation error code
+            alert(`Error: Invoice Number "${invoiceNo}" already exists. Please use a unique invoice number.`);
+        } else {
+            alert(`Failed to save purchase: ${error.message || error.details || 'Unknown error'}`);
+        }
+        console.error("Purchase submission error:", error);
       }
     };
 
     return (
-      <form onSubmit={handleSubmit} className="space-y-6 p-6 text-gray-700 bg-green-50 rounded-lg shadow-xl">
-        <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-          {purchase ? 'Edit Purchase' : 'Add New Purchase'}
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="space-y-6 p-6 bg-white border border-gray-300 rounded-lg shadow-md text-gray-800">
+        <h3 className="text-2xl font-semibold mb-4">Add Purchase</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-            <input
-              id="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              type="date"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-            />
+            <label className="text-sm font-medium">Date</label>
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:ring-2 focus:ring-green-500" />
           </div>
           <div>
-            <label htmlFor="invoiceNo" className="block text-sm font-medium text-gray-700 mb-1">Invoice No</label>
-            <input
-              id="invoiceNo"
-              value={invoiceNo}
-              onChange={(e) => setInvoiceNo(e.target.value)}
-              placeholder="Invoice No"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-            />
+            <label className="text-sm font-medium">Invoice No</label>
+            <input type="text" value={invoiceNo} onChange={(e) => setInvoiceNo(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:ring-2 focus:ring-green-500" />
           </div>
           <div>
-            <label htmlFor="productName" className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
-            <input
-              id="productName"
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
-              placeholder="Product Name"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-            />
-          </div>
-          <div>
-            <label htmlFor="distributor" className="block text-sm font-medium text-gray-700 mb-1">Distributor</label>
-            <input
-              id="distributor"
-              value={distributor}
-              onChange={(e) => setDistributor(e.target.value)}
-              placeholder="Distributor"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-            />
-          </div>
-          <div>
-            <label htmlFor="hsn" className="block text-sm font-medium text-gray-700 mb-1">HSN Code</label>
-            <input
-              id="hsn"
-              value={hsn}
-              onChange={(e) => setHsn(e.target.value)}
-              placeholder="HSN Code"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-            />
-          </div>
-          <div>
-            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-            <input
-              id="quantity"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              type="number"
-              placeholder="Quantity"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
-            <input
-              id="amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              type="number"
-              placeholder="Amount"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-            />
+            <label className="text-sm font-medium">Distributor</label>
+            <input value={distributor} onChange={(e) => setDistributor(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:ring-2 focus:ring-green-500" />
           </div>
         </div>
+        <div>
+          <h4 className="text-lg font-semibold mt-6 mb-2">Materials</h4>
+          <div className="overflow-x-auto">
+            <table className="w-full border rounded text-sm">
+              <thead className="bg-gray-100 text-gray-800 font-semibold border-b border-gray-300">
+                <tr>
+                  <th className="px-3 py-2 text-left">Serial No</th>
+                  <th className="px-3 py-2 text-left">Product Name</th>
+                  <th className="px-3 py-2 text-left">HSN</th>
+                  <th className="px-3 py-2 text-left">Brand</th>
+                  <th className="px-3 py-2 text-left">Quantity</th>
+                  <th className="px-3 py-2 text-left">Amount</th>
+                  <th className="px-3 py-2 text-left">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {materials.map((item, index) => (
+                  <tr key={index} className="border-t bg-white">
+                    <td className="px-3 py-2"><input value={item.serialNo} onChange={(e) => handleMaterialChange(index, 'serialNo', e.target.value)} className="w-full px-2 py-1 border border-gray-300 bg-gray-50 rounded" /></td>
+                    <td className="px-3 py-2"><input value={item.productName} onChange={(e) => handleMaterialChange(index, 'productName', e.target.value)} className="w-full px-2 py-1 border border-gray-300 bg-gray-50 rounded" /></td>
+                    <td className="px-3 py-2"><input value={item.hsn} onChange={(e) => handleMaterialChange(index, 'hsn', e.target.value)} className="w-full px-2 py-1 border border-gray-300 bg-gray-50 rounded" /></td>
+                    <td className="px-3 py-2"><input value={item.brand} onChange={(e) => handleMaterialChange(index, 'brand', e.target.value)} className="w-full px-2 py-1 border border-gray-300 bg-gray-50 rounded" /></td>
+                    {/* Quantity input remains type="number" for user, but we'll send as string */}
+                    <td className="px-3 py-2"><input type="number" value={item.quantity} onChange={(e) => handleMaterialChange(index, 'quantity', e.target.value)} className="w-full px-2 py-1 border border-gray-300 bg-gray-50 rounded" /></td>
+                    <td className="px-3 py-2"><input type="number" value={item.amount} onChange={(e) => handleMaterialChange(index, 'amount', e.target.value)} className="w-full px-2 py-1 border border-gray-300 bg-gray-50 rounded" /></td>
+                    <td className="px-3 py-2"><button type="button" onClick={() => removeMaterialRow(index)} className="text-red-600 hover:underline">Remove</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <button type="button" onClick={addMaterialRow} className="mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">+ Add Row</button>
+        </div>
         <div className="flex justify-end gap-4 mt-6">
-          <button
-            type="button"
-            onClick={onClose}
-            className="bg-gray-300 text-gray-800 py-2 px-5 rounded-md hover:bg-gray-400 transition duration-150 ease-in-out"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="bg-green-600 text-white py-2 px-5 rounded-md hover:bg-green-700 transition duration-150 ease-in-out"
-          >
-            {purchase ? 'Update Purchase' : 'Add Purchase'}
-          </button>
+          <button type="button" onClick={onClose} className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md">Cancel</button>
+          <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">Save Purchase</button>
         </div>
       </form>
     );
-  };
-
-  // Function to handle Excel/CSV download of filtered data
-  const handleDownload = (format) => {
-    if (filteredProducts.length === 0) {
-      alert("No data to download.");
-      return;
-    }
-
-    const worksheet = XLSX.utils.json_to_sheet(filteredProducts);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Purchases");
-
-    let fileName = `filtered_purchases.${format}`;
-    let fileType = format === 'csv' ? 'text/csv;charset=utf-8;' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8;';
-
-    if (format === 'csv') {
-      const csvData = XLSX.utils.sheet_to_csv(worksheet);
-      const blob = new Blob([csvData], { type: fileType });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else { // xlsx
-      XLSX.writeFile(workbook, fileName);
-    }
   };
 
   return (
     <div className="flex justify-center items-center w-full max-w-screen">
       <div className="p-6 bg-white w-full max-w-screen h-full overflow-x-clip font-sans">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-3xl font-bold text-gray-800">Purchase List</h2>
+          <h2 className="text-3xl font-bold text-gray-800">Purchase Management</h2>
           <div className="flex space-x-2">
-            <button
-              onClick={() => { setEditPurchase(null); setShowPurchaseForm(true); setShowBulkForm(false); }}
-              className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700"
-            >
-              Add Purchase
-            </button>
-            <button
-              onClick={() => { setShowBulkForm(true); setShowPurchaseForm(false); setEditPurchase(null); }}
-              className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
-            >
-              Add Bulk
-            </button>
+            <button onClick={() => { setShowPurchaseForm(true); setShowBulkForm(false); setSelectedInvoiceNo(null); }} className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700">Add Purchase</button>
+            <button onClick={() => { setShowBulkForm(true); setShowBulkForm(false); setSelectedInvoiceNo(null); }} className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Add Bulk</button>
+            <button onClick={() => handleDownload('xlsx')} className="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 text-sm">Download Excel</button>
+            <button onClick={() => handleDownload('csv')} className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700 text-sm">Download CSV</button>
           </div>
         </div>
 
-        {/* Filter Component and Download Buttons within a flex container for alignment */}
-        {!showPurchaseForm && !showBulkForm && (
-          <div className="bg-white p-4 rounded-lg shadow-md mb-6 border border-gray-200">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-gray-800">Filter Purchases</h3>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => handleDownload('xlsx')}
-                  className="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 text-sm"
-                >
-                  Download Excel
-                </button>
-                <button
-                  onClick={() => handleDownload('csv')}
-                  className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700 text-sm"
-                >
-                  Download CSV
-                </button>
-              </div>
+        {/* Conditional rendering of forms/details */}
+        {showPurchaseForm && <PurchaseForm onClose={() => setShowPurchaseForm(false)} onSuccess={fetchInvoices} />}
+        {showBulkForm && <ProductsBulk onClose={() => setShowBulkForm(false)} onSuccess={fetchInvoices} />}
+        {selectedInvoiceNo && <InvoiceDetails invoiceNo={selectedInvoiceNo} onClose={() => setSelectedInvoiceNo(null)} />}
+
+        {/* Only show the invoice list if no form/details are open */}
+        {!showPurchaseForm && !showBulkForm && !selectedInvoiceNo && (
+            <div className="mt-8">
+              <h3 className="text-xl font-semibold mb-4 text-gray-800">Recent Purchases</h3>
+              {invoices.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white rounded-lg shadow overflow-hidden">
+                    <thead className="bg-gray-200 text-gray-700">
+                      <tr>
+                        {/* Headers to match purchase_masters columns */}
+                        <th className="px-4 py-2 text-left">Date</th>
+                        <th className="px-4 py-2 text-left">Invoice No</th>
+                        <th className="px-4 py-2 text-left">Distributor</th>
+                        <th className="px-4 py-2 text-left">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {invoices.map((invoice) => (
+                        <tr key={invoice.invoice_no} className="border-b border-gray-200 hover:bg-gray-50">
+                          {/* Accessing 'date' column as per your database screenshot */}
+                          <td className="px-4 py-2">{formatDate(invoice.date)}</td>
+                          <td className="px-4 py-2">{invoice.invoice_no}</td>
+                          <td className="px-4 py-2">{invoice.distributor}</td>
+                          <td className="px-4 py-2">
+                            <button
+                              onClick={() => setSelectedInvoiceNo(invoice.invoice_no)}
+                              className="bg-indigo-500 text-white px-3 py-1 rounded hover:bg-indigo-600 text-sm"
+                            >
+                              Show Details
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="p-4 text-gray-600">No purchases found. Add a new purchase to get started!</p>
+              )}
             </div>
-            <FilterProducts products={products} onFilter={handleFilteredData} />
-            {/* The Clear Filters button is already inside FilterProducts component */}
-          </div>
         )}
-
-        {showPurchaseForm && (
-          <PurchaseForm
-            onClose={() => { setShowPurchaseForm(false); setEditPurchase(null); }}
-            onSuccess={fetchProducts}
-            purchase={editPurchase}
-          />
-        )}
-
-        {showBulkForm && (
-          <ProductsBulk
-            onClose={() => setShowBulkForm(false)}
-            onSuccess={fetchProducts}
-          />
-        )}
-
-        {/* Removed the old download buttons div */}
-        {/* <div className="flex justify-end mb-4 space-x-2">
-          <button
-            onClick={() => handleDownload('xlsx')}
-            className="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700"
-          >
-            Download Excel
-          </button>
-          <button
-            onClick={() => handleDownload('csv')}
-            className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700"
-          >
-            Download CSV
-          </button>
-        </div> */}
-
-        <div className="overflow-x-auto mt-6">
-          {loading ? (
-            <div className="text-center py-8 text-gray-500">Loading...</div>
-          ) : error ? (
-            <div className="text-center py-8 text-red-500">{error}</div>
-          ) : filteredProducts.length === 0 ? ( // Display filtered products
-            <div className="text-center py-8 text-gray-500">No purchases available based on current filters.</div>
-          ) : (
-            <table className="w-full table-auto border-collapse">
-              <thead>
-                <tr className="bg-gray-100 text-gray-700 uppercase text-sm">
-                  <th className="py-3 px-6 text-left">#</th>
-                  <th className="py-3 px-6 text-left">Date</th>
-                  <th className="py-3 px-6 text-left">Invoice No</th>
-                  <th className="py-3 px-6 text-left">Product</th>
-                  <th className="py-3 px-6 text-left">Distributor</th>
-                  <th className="py-3 px-6 text-left">HSN</th>
-                  <th className="py-3 px-6 text-center">QTY</th>
-                  <th className="py-3 px-6 text-center">Amount</th>
-                  <th className="py-3 px-6 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="text-gray-600 text-sm font-light">
-                {filteredProducts.map((item, index) => ( // Use filteredProducts here
-                  <tr key={item.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-6">{index + 1}</td>
-                    <td className="py-3 px-6">{item.date}</td>
-                    <td className="py-3 px-6">{item.invoice_no}</td>
-                    <td className="py-3 px-6">{item.product_name}</td>
-                    <td className="py-3 px-6">{item.distributor}</td>
-                    <td className="py-3 px-6">{item.hsn}</td>
-                    <td className="py-3 px-6 text-center">{item.quantity}</td>
-                    <td className="py-3 px-6 text-center">{item.amount}</td>
-                    <td className="py-3 px-6 text-center">
-                      <button onClick={() => handleEdit(item)} className="text-blue-600 hover:underline">Edit</button>
-                      <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:underline ml-2">Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
       </div>
     </div>
   );

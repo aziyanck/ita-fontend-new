@@ -1,6 +1,68 @@
 // src/supabaseServices.js
-import { supabase } from './supabaseClient';
+import { supabase } from './supabaseClient'; // Assuming this correctly exports your supabase client
 
+// --- Functions for the new purchase_masters table ---
+
+const addPurchaseMaster = async (masterData) => {
+  const { data, error } = await supabase
+    .from('purchase_masters') // Correct: plural
+    .insert([masterData])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Insert purchase_master error:", error.details || error.message);
+    throw error; // Throw error to be caught by the calling component (PurchaseForm)
+  }
+  return data;
+};
+
+const getPurchaseMasters = async () => {
+  const { data, error } = await supabase
+    .from('purchase_masters') // Correct: plural
+    // Select 'date' to match the database column name
+    .select('invoice_no, date, distributor')
+    .order('date', { ascending: false }); // Order by 'date'
+
+  if (error) {
+    console.error("Fetch purchase_masters error:", error.details || error.message);
+    throw error;
+  }
+  return data;
+};
+
+// --- Functions for the new purchase_items table ---
+
+const addPurchaseItems = async (itemsDataArray) => {
+  const { data, error } = await supabase
+    .from('purchase_items') // Correct: plural
+    .insert(itemsDataArray)
+    .select(); // Select inserted data for confirmation
+
+  if (error) {
+    console.error("Insert purchase_items error:", error.details || error.message);
+    throw error; // Throw error to be caught by the calling component (PurchaseForm)
+  }
+  return data;
+};
+
+const getPurchaseItemsByInvoice = async (invoiceNo) => {
+  const { data, error } = await supabase
+    .from('purchase_items') // Correct: plural
+    .select('*') // Select all item details
+    .eq('invoice_no', invoiceNo) // Filter by the foreign key
+    .order('product_name', { ascending: true }); // Order items within the invoice
+
+  if (error) {
+    console.error(`Fetch purchase_items for invoice ${invoiceNo} error:`, error.details || error.message);
+    throw error;
+  }
+  return data;
+};
+
+// --- Existing functions (from your original supabaseServices.js, targeting 'purchase_details') ---
+// I'm keeping these here, but they are not used by the new purchase flow.
+// You can remove them if your 'purchase_details' table is no longer in use.
 const getAll = async () => {
   const { data, error } = await supabase
     .from('purchase_details')
@@ -27,12 +89,11 @@ const addPurchase = async (purchaseData) => {
   return data;
 };
 
-// --- New function for bulk insertion ---
 const addBulkPurchases = async (purchaseDataArray) => {
   const { data, error } = await supabase
     .from('purchase_details')
     .insert(purchaseDataArray)
-    .select(); // Optionally select inserted data
+    .select();
 
   if (error) {
     console.error("Bulk insert error:", error.details || error.message);
@@ -40,7 +101,6 @@ const addBulkPurchases = async (purchaseDataArray) => {
   }
   return { data, error: null };
 };
-// --- End of new function ---
 
 const updatePurchase = async (id, updatedData) => {
   const { data, error } = await supabase
@@ -59,7 +119,7 @@ const updatePurchase = async (id, updatedData) => {
 const deletePurchase = async (id) => {
   if (!id || typeof id !== 'string' || id.length < 10) {
     console.warn("Blocked delete: invalid ID →", id);
-    return null; // Return null for invalid IDs to prevent unintended operations
+    return null;
   }
   const { data, error } = await supabase
     .from('purchase_details')
@@ -78,5 +138,18 @@ const deletePurchase = async (id) => {
   return data;
 };
 
-// Export the new function along with existing ones
-export default { getAll, addPurchase, updatePurchase, deletePurchase, addBulkPurchases };
+// Export all relevant functions
+export default {
+  // New functions for the normalized schema
+  addPurchaseMaster,
+  getPurchaseMasters,
+  addPurchaseItems,
+  getPurchaseItemsByInvoice,
+
+  // Existing functions (from 'purchase_details' table) - keep if still needed for old data/features
+  getAll,
+  addPurchase,
+  updatePurchase,
+  deletePurchase,
+  addBulkPurchases
+};

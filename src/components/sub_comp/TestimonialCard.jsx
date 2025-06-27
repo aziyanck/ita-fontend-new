@@ -1,6 +1,5 @@
 import React from 'react';
 import { Star } from 'lucide-react';
-
 const TestimonialCard = ({
   text,
   name,
@@ -13,7 +12,6 @@ const TestimonialCard = ({
       <p className="text-lt text-lg leading-relaxed line-clamp-3">
         {text}
       </p>
-
       <div>
         <hr className="border-gray-600 my-2" />
         <div className="flex items-center gap-3">
