@@ -117,7 +117,7 @@ const PurchasesTable = ({ data, setSelectedInvoice }) => (
         <tr key={`${purchase.invoice_no}-${index}`} className="border-b hover:bg-gray-50">
           <td className="px-4 py-2">{index + 1}</td>
           <td
-            className="px-4 py-2 text-blue-600 underline cursor-pointer"
+            className="px-4 py-2 text-blue-600 cursor-pointer"
             onClick={() => setSelectedInvoice(purchase.invoice_no)}
           >
             {purchase.invoice_no}

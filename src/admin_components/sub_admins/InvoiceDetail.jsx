@@ -35,8 +35,9 @@ const InvoiceDetail = ({ invoiceNo, onClose }) => {
   // Memoized calculation to get a unique list of dealers
   const dealerNames = useMemo(() => {
     if (!invoiceData?.purchase_items) return 'N/A';
-
+    
     // Create a set of all dealer names to ensure uniqueness
+
     const dealers = new Set(
       invoiceData.purchase_items
         .map(item => item.component?.dealer?.name)
