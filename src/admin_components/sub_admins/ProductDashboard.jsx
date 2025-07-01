@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { getAllComponents, getAllPurchases } from '../supabaseServices';
+import { getAllComponents, getPurchasesSummary } from '../supabaseServices';
 
 const ProductDashboard = () => {
   const [activeTab, setActiveTab] = useState('components'); // components | purchase | sell
   const [tableData, setTableData] = useState([]);
 
-  // Fetch data when activeTab changes
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -13,7 +12,7 @@ const ProductDashboard = () => {
           const data = await getAllComponents();
           setTableData(data);
         } else if (activeTab === 'purchase') {
-          const data = await getAllPurchases();
+          const data = await getPurchasesSummary();
           setTableData(data);
         } else if (activeTab === 'sell') {
           setTableData([]); // placeholder since sell isn't implemented
@@ -27,7 +26,7 @@ const ProductDashboard = () => {
   }, [activeTab]);
 
   return (
-    <div className="bg-gray-200 p-4 max-w-screen md:w-full h-auto  text-gray-600 mx-auto rounded-lg shadow-md">
+    <div className="bg-gray-200 p-4 max-w-screen md:w-full h-auto text-gray-600 mx-auto rounded-lg shadow-md">
       {/* Tab Buttons */}
       <div className="flex space-x-2 mb-4">
         <button
@@ -57,15 +56,9 @@ const ProductDashboard = () => {
       </div>
 
       {/* Table Container */}
-      <div className="border border-gray-300 rounded-md overflow-x-scroll bg-white p-4  min-h-[200px]">
-        {activeTab === 'components' && (
-          <ComponentsTable data={tableData} />
-        )}
-
-        {activeTab === 'purchase' && (
-          <PurchasesTable data={tableData} />
-        )}
-
+      <div className="border border-gray-300 rounded-md overflow-x-scroll bg-white p-4 min-h-[200px]">
+        {activeTab === 'components' && <ComponentsTable data={tableData} />}
+        {activeTab === 'purchase' && <PurchasesTable data={tableData} />}
         {activeTab === 'sell' && (
           <div className="text-gray-500 text-center py-8">
             Sell functionality coming soon...
@@ -104,27 +97,37 @@ const ComponentsTable = ({ data }) => (
   </table>
 );
 
-
 /* Purchases Table */
 const PurchasesTable = ({ data }) => (
   <table className="min-w-full text-left">
     <thead>
-      <tr className="border-b">
-        <th className="px-4 py-2">Invoice No</th>
-        <th className="px-4 py-2">Component ID</th>
-        <th className="px-4 py-2">Qty</th>
-        <th className="px-4 py-2">Price</th>
-        <th className="px-4 py-2">Date</th>
+      <tr className="border-b bg-gray-100">
+        <th className="px-4 py-2">Sl No.</th>
+        <th className="px-4 py-2">Invoice No.</th>
+        <th className="px-4 py-2">Total Amount</th>
+        <th className="px-4 py-2">Dealer</th>
+        <th className="px-4 py-2">Purchase Date</th>
       </tr>
     </thead>
     <tbody>
-      {data.map((purchase) => (
-        <tr key={purchase.id} className="border-b hover:bg-gray-50">
+      {data.map((purchase, index) => (
+        <tr
+          key={`${purchase.invoice_no || 'invoice'}-${index}`} // safe unique key
+          className="border-b hover:bg-gray-50"
+        >
+          <td className="px-4 py-2">{index + 1}</td>
           <td className="px-4 py-2">{purchase.invoice_no}</td>
-          <td className="px-4 py-2">{purchase.comp_id}</td>
-          <td className="px-4 py-2">{purchase.qty}</td>
-          <td className="px-4 py-2">{purchase.price}</td>
-          <td className="px-4 py-2">{purchase.date}</td>
+          <td className="px-4 py-2">₹ {(purchase.total ?? 0).toFixed(2)}</td>
+          <td className="px-4 py-2">
+            {typeof purchase.dealer === 'string'
+              ? purchase.dealer
+              : purchase.dealer?.name || 'N/A'}
+          </td>
+          <td className="px-4 py-2">
+            {purchase.date
+              ? new Date(purchase.date).toLocaleDateString()
+              : 'N/A'}
+          </td>
         </tr>
       ))}
     </tbody>

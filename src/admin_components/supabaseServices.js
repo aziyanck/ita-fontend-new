@@ -107,9 +107,48 @@ export const getAllComponents = async () => {
   return data;
 };
 
+export const getPurchasesSummary = async () => {
+  const { data, error } = await supabase
+    .from('invoices')
+    .select(`
+      invoice_no,
+      date,
+      purchase_items:purchase_items (
+        qty,
+        price,
+        comp_id,
+        component:comp_id (
+          dealer:dealer_id (
+            name
+          )
+        )
+      )
+    `)
+    .eq('invoice_type', 'purchase')
+    .order('date', { ascending: false });
 
-export const getAllPurchases = async () => {
-  const { data, error } = await supabase.from('purchase_items').select('*').order('id', { ascending: false });
   if (error) throw error;
-  return data;
+
+  const summaries = data.map((invoice) => {
+    let totalAmount = 0;
+    let dealerName = 'N/A';
+
+    if (invoice.purchase_items && invoice.purchase_items.length > 0) {
+      totalAmount = invoice.purchase_items.reduce(
+        (sum, item) => sum + (item.qty * item.price),
+        0
+      );
+      const firstDealer = invoice.purchase_items[0].component?.dealer?.name;
+      dealerName = firstDealer || 'N/A';
+    }
+
+    return {
+      invoice_no: invoice.invoice_no,
+      date: invoice.date,
+      dealer: dealerName,
+      total: totalAmount ?? 0,
+    };
+  });
+
+  return summaries;
 };

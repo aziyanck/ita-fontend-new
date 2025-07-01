@@ -329,7 +329,7 @@ const AddPurchase = ({ onClose }) => {
                 Add Another Item
               </button>
               <button type="submit" className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition-colors">
-                Create Invoice
+                Save Invoice
               </button>
             </div>
           </form>
