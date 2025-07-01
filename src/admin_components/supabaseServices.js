@@ -1,82 +1,85 @@
 // src/supabaseServices.js
+
 import { supabase } from './supabaseClient';
 
-const getAll = async () => {
+// 1) Insert an invoice
+export const insertInvoice = async (invoiceData) => {
   const { data, error } = await supabase
-    .from('purchase_details')
-    .select('*')
-    .order('date', { ascending: false });
-
-  if (error) {
-    console.error("Fetch error:", error);
-    return [];
-  }
+    .from('invoices')
+    .insert([invoiceData])
+    .select()
+    .single();
+  if (error) throw error;
   return data;
 };
 
-const addPurchase = async (purchaseData) => {
+// 2) Insert a component
+export const insertComponent = async (componentData) => {
   const { data, error } = await supabase
-    .from('purchase_details')
+    .from('components')
+    .insert([componentData])
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+};
+
+// 3) Insert a purchase item
+export const insertPurchaseItem = async (purchaseData) => {
+  const { data, error } = await supabase
+    .from('purchase_items')
     .insert([purchaseData])
-    .select();
-
-  if (error) {
-    console.error("Insert error:", error.details || error.message);
-    return null;
-  }
+    .select()
+    .single();
+  if (error) throw error;
   return data;
 };
 
-// --- New function for bulk insertion ---
-const addBulkPurchases = async (purchaseDataArray) => {
-  const { data, error } = await supabase
-    .from('purchase_details')
-    .insert(purchaseDataArray)
-    .select(); // Optionally select inserted data
+export const getComponentDetails = async (componentId = null) => {
+  let query = supabase.from('components').select('*');
 
-  if (error) {
-    console.error("Bulk insert error:", error.details || error.message);
-    return { data: null, error };
+  if (componentId) {
+    query = query.eq('id', componentId).single();
   }
-  return { data, error: null };
-};
-// --- End of new function ---
 
-const updatePurchase = async (id, updatedData) => {
-  const { data, error } = await supabase
-    .from('purchase_details')
-    .update(updatedData)
-    .eq('id', id)
-    .select();
-
-  if (error) {
-    console.error("Update error:", error);
-    return null;
-  }
+  const { data, error } = await query;
+  if (error) throw error;
   return data;
 };
 
-const deletePurchase = async (id) => {
-  if (!id || typeof id !== 'string' || id.length < 10) {
-    console.warn("Blocked delete: invalid ID →", id);
-    return null; // Return null for invalid IDs to prevent unintended operations
-  }
-  const { data, error } = await supabase
-    .from('purchase_details')
-    .delete()
-    .eq('id', id)
-    .select();
 
-  if (error) {
-    console.error("Delete error:", error);
-    return null;
-  }
-  if (!data || data.length === 0) {
-    console.warn("No rows deleted — check RLS or ID");
-    return null;
-  }
+// 4) Update component quantity
+export const updateComponentQty = async (compId, newQty) => {
+  const { data, error } = await supabase
+    .from('components')
+    .update({ qty: newQty })
+    .eq('id', compId)
+    .select()
+    .single();
+  if (error) throw error;
   return data;
 };
 
-// Export the new function along with existing ones
-export default { getAll, addPurchase, updatePurchase, deletePurchase, addBulkPurchases };
+
+
+// Insert a new dealer
+export const insertDealer = async (dealerName) => {
+  const { data, error } = await supabase
+    .from('dealers')
+    .insert([{ name: dealerName }])
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+};
+
+// Get an existing dealer by name
+export const getDealerByName = async (dealerName) => {
+  const { data, error } = await supabase
+    .from('dealers')
+    .select('*')
+    .eq('name', dealerName)
+    .single();
+  if (error && error.code !== 'PGRST116') throw error; // PGRST116: no rows found
+  return data; // Can be null if not found
+};
