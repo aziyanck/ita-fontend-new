@@ -252,8 +252,8 @@ const AddPurchase = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center text-gray-600 justify-center h-full bg-black/30 backdrop-blur-sm p-4">
-      <div className="relative max-w-4xl w-full bg-white rounded-2xl shadow-2xl overflow-y-auto max-h-screen">
+    <div className="fixed inset-0 z-50 flex py-15 items-center text-gray-600 justify-center h-full bg-black/30 backdrop-blur-sm p-4">
+      <div className="relative max-w-4xl w-full bg-white mt-10 rounded-2xl shadow-2xl overflow-y-auto max-h-screen">
         <div className="p-6 md:p-8">
           <button
             onClick={onClose}
