@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getAllComponents, getPurchasesSummary } from '../supabaseServices';
 import InvoiceDetail from './InvoiceDetail';
+import ComponentsTable from './ComponentsTable';
+
 
 const ProductDashboard = () => {
   const [activeTab, setActiveTab] = useState('components'); // components | purchase | sell
@@ -52,7 +54,7 @@ const ProductDashboard = () => {
       </div>
 
       {/* Table Container */}
-      <div className="border border-gray-300 rounded-md overflow-x-scroll bg-white p-4 min-h-[200px]">
+      <div className="border border-gray-300 rounded-md overflow-x-scroll bg-green-100 p-4 min-h-[200px]">
         {activeTab === 'components' && <ComponentsTable data={tableData} />}
         {activeTab === 'purchase' && <PurchasesTable data={tableData} setSelectedInvoice={setSelectedInvoice} />}
         {activeTab === 'sell' && (
@@ -73,32 +75,7 @@ const ProductDashboard = () => {
 };
 
 /* Components Table */
-const ComponentsTable = ({ data }) => (
-  <table className="min-w-full text-left">
-    <thead>
-      <tr className="border-b bg-gray-100">
-        <th className="px-4 py-2">Sl No.</th>
-        <th className="px-4 py-2">Name</th>
-        <th className="px-4 py-2">HSN</th>
-        <th className="px-4 py-2">Qty</th>
-        <th className="px-4 py-2">Brand</th>
-        <th className="px-4 py-2">Dealer Name</th>
-      </tr>
-    </thead>
-    <tbody>
-      {data.map((comp, index) => (
-        <tr key={`${comp.id}-${index}`} className="border-b hover:bg-gray-50">
-          <td className="px-4 py-2">{index + 1}</td>
-          <td className="px-4 py-2">{comp.name}</td>
-          <td className="px-4 py-2">{comp.hsn}</td>
-          <td className="px-4 py-2">{comp.qty}</td>
-          <td className="px-4 py-2">{comp.brand}</td>
-          <td className="px-4 py-2">{comp.dealer?.name || 'N/A'}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-);
+
 
 /* Purchases Table */
 const PurchasesTable = ({ data, setSelectedInvoice }) => (
