@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import AddPurchase from './sub_admins/AddPurchase'; // Make sure the path is correct!
+import ProductDashboard from './sub_admins/ProductDashboard';
 
 const ProductComponent = () => {
   const [showAddPurchase, setShowAddPurchase] = useState(false);
@@ -13,7 +14,7 @@ const ProductComponent = () => {
   };
 
   return (
-    <div className="bg-gray-200 p-4 w-full mx-auto">
+    <div className="bg-gray-200 p-4 w-full h-auto mx-auto">
 
       <div className="flex justify-end items-center mb-4">
         <button
@@ -24,14 +25,22 @@ const ProductComponent = () => {
         </button>
       </div>
 
-      <div className="flex justify-end items-center mb-4">
+      <div className="flex justify-end items-center gap-5 mb-4">
+
+        <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded flex items-center">
+          Download XLS
+        </button>
+        <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded flex items-center">
+          Download CSV
+        </button>
+
         <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded flex items-center">
           Filter
         </button>
       </div>
 
-      <div className="border border-gray-300 rounded-md h-96 bg-gray-50 p-4">
-        <p className="text-gray-500">table here</p>
+      <div className="border border-gray-300 rounded-md  bg-gray-50 h-full p-4">
+        <ProductDashboard/>
       </div>
 
       {showAddPurchase && (

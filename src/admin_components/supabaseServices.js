@@ -83,3 +83,33 @@ export const getDealerByName = async (dealerName) => {
   if (error && error.code !== 'PGRST116') throw error; // PGRST116: no rows found
   return data; // Can be null if not found
 };
+
+
+// src/supabaseServices.js
+
+export const getAllComponents = async () => {
+  const { data, error } = await supabase
+    .from('components')
+    .select(`
+      id,
+      name,
+      hsn,
+      qty,
+      brand,
+      dealer:dealer_id (
+        id,
+        name
+      )
+    `)
+    .order('name', { ascending: true });
+
+  if (error) throw error;
+  return data;
+};
+
+
+export const getAllPurchases = async () => {
+  const { data, error } = await supabase.from('purchase_items').select('*').order('id', { ascending: false });
+  if (error) throw error;
+  return data;
+};
