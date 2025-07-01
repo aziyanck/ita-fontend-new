@@ -14,7 +14,7 @@ const ProductComponent = () => {
   };
 
   return (
-    <div className="bg-gray-200 p-4 w-full h-auto mx-auto">
+    <div className="bg-gray-200 p-4 w-screen  md:w-full h-auto mx-auto">
 
       <div className="flex justify-end items-center mb-4">
         <button

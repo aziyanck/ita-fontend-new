@@ -27,7 +27,7 @@ const ProductDashboard = () => {
   }, [activeTab]);
 
   return (
-    <div className="bg-gray-200 p-4 w-full h-auto text-gray-600 mx-auto rounded-lg shadow-md">
+    <div className="bg-gray-200 p-4 max-w-screen md:w-full h-auto  text-gray-600 mx-auto rounded-lg shadow-md">
       {/* Tab Buttons */}
       <div className="flex space-x-2 mb-4">
         <button
@@ -57,7 +57,7 @@ const ProductDashboard = () => {
       </div>
 
       {/* Table Container */}
-      <div className="border border-gray-300 rounded-md bg-white p-4 overflow-x-auto min-h-[200px]">
+      <div className="border border-gray-300 rounded-md overflow-x-scroll bg-white p-4  min-h-[200px]">
         {activeTab === 'components' && (
           <ComponentsTable data={tableData} />
         )}
