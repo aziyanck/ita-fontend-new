@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { getAllComponents, getPurchasesSummary } from '../supabaseServices';
+import InvoiceDetail from './InvoiceDetail';
+
 
 const ProductDashboard = () => {
   const [activeTab, setActiveTab] = useState('components'); // components | purchase | sell
   const [tableData, setTableData] = useState([]);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,25 +35,22 @@ const ProductDashboard = () => {
       <div className="flex space-x-2 mb-4">
         <button
           onClick={() => setActiveTab('components')}
-          className={`px-4 py-2 rounded ${
-            activeTab === 'components' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-800'
-          }`}
+          className={`px-4 py-2 rounded ${activeTab === 'components' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-800'
+            }`}
         >
           Components
         </button>
         <button
           onClick={() => setActiveTab('purchase')}
-          className={`px-4 py-2 rounded ${
-            activeTab === 'purchase' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-800'
-          }`}
+          className={`px-4 py-2 rounded ${activeTab === 'purchase' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-800'
+            }`}
         >
           Purchase
         </button>
         <button
           onClick={() => setActiveTab('sell')}
-          className={`px-4 py-2 rounded ${
-            activeTab === 'sell' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-800'
-          }`}
+          className={`px-4 py-2 rounded ${activeTab === 'sell' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-800'
+            }`}
         >
           Sell
         </button>
@@ -58,13 +59,21 @@ const ProductDashboard = () => {
       {/* Table Container */}
       <div className="border border-gray-300 rounded-md overflow-x-scroll bg-white p-4 min-h-[200px]">
         {activeTab === 'components' && <ComponentsTable data={tableData} />}
-        {activeTab === 'purchase' && <PurchasesTable data={tableData} />}
+        {activeTab === 'purchase' && <PurchasesTable data={tableData} setSelectedInvoice={setSelectedInvoice} />
+}
         {activeTab === 'sell' && (
           <div className="text-gray-500 text-center py-8">
             Sell functionality coming soon...
           </div>
         )}
       </div>
+      {selectedInvoice && (
+        <InvoiceDetail
+          invoiceNo={selectedInvoice}
+          onClose={() => setSelectedInvoice(null)}
+        />
+      )}
+
     </div>
   );
 };
@@ -98,7 +107,7 @@ const ComponentsTable = ({ data }) => (
 );
 
 /* Purchases Table */
-const PurchasesTable = ({ data }) => (
+const PurchasesTable = ({ data, setSelectedInvoice }) => (
   <table className="min-w-full text-left">
     <thead>
       <tr className="border-b bg-gray-100">
@@ -111,22 +120,18 @@ const PurchasesTable = ({ data }) => (
     </thead>
     <tbody>
       {data.map((purchase, index) => (
-        <tr
-          key={`${purchase.invoice_no || 'invoice'}-${index}`} // safe unique key
-          className="border-b hover:bg-gray-50"
-        >
+        <tr key={purchase.invoice_no} className="border-b hover:bg-gray-50">
           <td className="px-4 py-2">{index + 1}</td>
-          <td className="px-4 py-2">{purchase.invoice_no}</td>
-          <td className="px-4 py-2">₹ {(purchase.total ?? 0).toFixed(2)}</td>
-          <td className="px-4 py-2">
-            {typeof purchase.dealer === 'string'
-              ? purchase.dealer
-              : purchase.dealer?.name || 'N/A'}
+          <td
+            className="px-4 py-2 text-blue-600 underline cursor-pointer"
+            onClick={() => setSelectedInvoice(purchase.invoice_no)}
+          >
+            {purchase.invoice_no}
           </td>
+          <td className="px-4 py-2">₹ {(purchase.total ?? 0).toFixed(2)}</td>
+          <td className="px-4 py-2">{purchase.dealer}</td>
           <td className="px-4 py-2">
-            {purchase.date
-              ? new Date(purchase.date).toLocaleDateString()
-              : 'N/A'}
+            {purchase.date ? new Date(purchase.date).toLocaleDateString() : 'N/A'}
           </td>
         </tr>
       ))}
