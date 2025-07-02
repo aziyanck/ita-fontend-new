@@ -116,6 +116,7 @@ export const getPurchasesSummary = async () => {
       `
       invoice_no,
       date,
+      total_amount,
       purchase_items:purchase_items (
         qty,
         price,
@@ -138,10 +139,7 @@ export const getPurchasesSummary = async () => {
     let dealerName = "N/A";
 
     if (invoice.purchase_items && invoice.purchase_items.length > 0) {
-      totalAmount = invoice.purchase_items.reduce(
-        (sum, item) => sum + item.qty * item.price,
-        0
-      );
+      
       const firstDealer = invoice.purchase_items[0].component?.dealer?.name;
       dealerName = firstDealer || "N/A";
     }
@@ -150,7 +148,8 @@ export const getPurchasesSummary = async () => {
       invoice_no: invoice.invoice_no,
       date: invoice.date,
       dealer: dealerName,
-      total: totalAmount ?? 0,
+      total_amount: invoice.total_amount
+      
     };
   });
 

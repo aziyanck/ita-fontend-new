@@ -42,40 +42,40 @@ const ProductDashboard = ({
   }, [activeTab]);
 
   const filteredData = useMemo(() => {
-  if (!filtersEnabled) return tableData; 
+    if (!filtersEnabled) return tableData;
 
-  let filtered = tableData;
+    let filtered = tableData;
 
-  if (searchQuery) {
-    const query = searchQuery.toLowerCase();
-    filtered = filtered.filter(item => {
-      if (activeTab === 'components') {
-        let searchField = '';
-        if (viewMode === 'category') {
-          searchField = (item.category?.name || '').toLowerCase();
-        } else {
-          searchField = (item.name || '').toLowerCase();
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(item => {
+        if (activeTab === 'components') {
+          let searchField = '';
+          if (viewMode === 'category') {
+            searchField = (item.category?.name || '').toLowerCase();
+          } else {
+            searchField = (item.name || '').toLowerCase();
+          }
+          return searchField.includes(query);
         }
-        return searchField.includes(query);
-      }
-      if (activeTab === 'purchase' || activeTab === 'sell') {
-        return (item.invoice_no || '').toLowerCase().includes(query);
-      }
-      return false;
-    });
-  }
+        if (activeTab === 'purchase' || activeTab === 'sell') {
+          return (item.invoice_no || '').toLowerCase().includes(query);
+        }
+        return false;
+      });
+    }
 
-  if ((activeTab === 'purchase' || activeTab === 'sell') && dateRange.from && dateRange.to) {
-    filtered = filtered.filter(item => {
-      const itemDate = new Date(item.date);
-      const fromDate = new Date(dateRange.from);
-      const toDate = new Date(dateRange.to);
-      return itemDate >= fromDate && itemDate <= toDate;
-    });
-  }
+    if ((activeTab === 'purchase' || activeTab === 'sell') && dateRange.from && dateRange.to) {
+      filtered = filtered.filter(item => {
+        const itemDate = new Date(item.date);
+        const fromDate = new Date(dateRange.from);
+        const toDate = new Date(dateRange.to);
+        return itemDate >= fromDate && itemDate <= toDate;
+      });
+    }
 
-  return filtered;
-}, [tableData, searchQuery, dateRange, activeTab, viewMode, filtersEnabled]);
+    return filtered;
+  }, [tableData, searchQuery, dateRange, activeTab, viewMode, filtersEnabled]);
 
 
   return (
@@ -148,7 +148,7 @@ const PurchasesTable = ({ data, setSelectedInvoice }) => (
             >
               {purchase.invoice_no}
             </td>
-            <td className="px-4 py-2">₹ {(purchase.total ?? 0).toFixed(2)}</td>
+            <td className="px-4 py-2">₹ {(purchase.total_amount ?? 0).toFixed(2)}</td>
             <td className="px-4 py-2">
               {typeof purchase.dealer === 'object'
                 ? purchase.dealer?.name || 'N/A'
@@ -163,5 +163,6 @@ const PurchasesTable = ({ data, setSelectedInvoice }) => (
     </table>
   </div>
 );
+
 
 export default ProductDashboard;
