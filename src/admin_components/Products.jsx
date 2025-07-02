@@ -58,10 +58,12 @@ const ProductComponent = () => {
         <ProductDashboard
           onTabChange={setCurrentTab}
           onViewModeChange={setCurrentViewMode}
-          viewMode={currentViewMode} // ✅ ADD THIS
+          viewMode={currentViewMode}
           searchQuery={searchQuery}
           dateRange={dateRange}
+          filtersEnabled={showFilters} // ✅ add this
         />
+
 
       </div>
 

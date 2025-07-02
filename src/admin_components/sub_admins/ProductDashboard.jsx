@@ -3,7 +3,14 @@ import { getAllComponents, getPurchasesSummary } from '../supabaseServices';
 import InvoiceDetail from './InvoiceDetail';
 import ComponentsTable from './ComponentsTable';
 
-const ProductDashboard = ({ onTabChange, onViewModeChange, viewMode, searchQuery, dateRange }) => {
+const ProductDashboard = ({
+  onTabChange,
+  onViewModeChange,
+  viewMode,
+  searchQuery,
+  dateRange,
+  filtersEnabled, // ✅ new prop
+}) => {
 
   const [activeTab, setActiveTab] = useState('components');
   const [tableData, setTableData] = useState([]);
@@ -35,41 +42,41 @@ const ProductDashboard = ({ onTabChange, onViewModeChange, viewMode, searchQuery
   }, [activeTab]);
 
   const filteredData = useMemo(() => {
-    if (!searchQuery && (!dateRange.from || !dateRange.to)) return tableData;
+  if (!filtersEnabled) return tableData; 
 
-    let filtered = tableData;
+  let filtered = tableData;
 
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(item => {
-        if (activeTab === 'components') {
-          let searchField = '';
-          if (viewMode === 'category') {
-            searchField = (item.category?.name || '').toLowerCase();
-          } else {
-            searchField = (item.name || '').toLowerCase();
-          }
-          return searchField.includes(query);
+  if (searchQuery) {
+    const query = searchQuery.toLowerCase();
+    filtered = filtered.filter(item => {
+      if (activeTab === 'components') {
+        let searchField = '';
+        if (viewMode === 'category') {
+          searchField = (item.category?.name || '').toLowerCase();
+        } else {
+          searchField = (item.name || '').toLowerCase();
         }
-        if (activeTab === 'purchase' || activeTab === 'sell') {
-          return (item.invoice_no || '').toLowerCase().includes(query);
-        }
-        return false;
-      });
-    }
+        return searchField.includes(query);
+      }
+      if (activeTab === 'purchase' || activeTab === 'sell') {
+        return (item.invoice_no || '').toLowerCase().includes(query);
+      }
+      return false;
+    });
+  }
 
+  if ((activeTab === 'purchase' || activeTab === 'sell') && dateRange.from && dateRange.to) {
+    filtered = filtered.filter(item => {
+      const itemDate = new Date(item.date);
+      const fromDate = new Date(dateRange.from);
+      const toDate = new Date(dateRange.to);
+      return itemDate >= fromDate && itemDate <= toDate;
+    });
+  }
 
-    if ((activeTab === 'purchase' || activeTab === 'sell') && dateRange.from && dateRange.to) {
-      filtered = filtered.filter(item => {
-        const itemDate = new Date(item.date);
-        const fromDate = new Date(dateRange.from);
-        const toDate = new Date(dateRange.to);
-        return itemDate >= fromDate && itemDate <= toDate;
-      });
-    }
+  return filtered;
+}, [tableData, searchQuery, dateRange, activeTab, viewMode, filtersEnabled]);
 
-    return filtered;
-  }, [tableData, searchQuery, dateRange, activeTab, onViewModeChange]);
 
   return (
     <div className="bg-gray-200 p-4 max-w-screen md:w-full h-auto text-gray-600 mx-auto rounded-lg shadow-md">
