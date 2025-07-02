@@ -1,27 +1,20 @@
 import React from 'react';
 
 const Filters = ({ activeTab, viewMode }) => {
-  // Determine search label and placeholder dynamically:
-  let searchLabel = '';
-  let searchPlaceholder = '';
-
-  if (activeTab === 'components') {
-    if (viewMode === 'category') {
-      searchLabel = 'Search by Category';
-      searchPlaceholder = 'Enter category name';
-    } else {
-      searchLabel = 'Search by Product';
-      searchPlaceholder = 'Enter product name';
+  const renderSearchLabel = () => {
+    if (activeTab === 'components') {
+      return viewMode === 'category' ? 'Search by Category' : 'Search by Product';
+    } else if (activeTab === 'purchase' || activeTab === 'sell') {
+      return 'Search by Invoice Number';
     }
-  } else if (activeTab === 'purchase' || activeTab === 'sell') {
-    searchLabel = 'Search by Invoice Number';
-    searchPlaceholder = 'Enter invoice number';
-  }
+    return 'Search';
+  };
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-md">
       <h2 className="text-lg font-semibold mb-4">Filter</h2>
 
+      {/* ✅ Date filters only for purchase/sell tabs */}
       {(activeTab === 'purchase' || activeTab === 'sell') && (
         <div className="mb-4 flex space-x-2">
           <div className="w-1/2">
@@ -49,12 +42,12 @@ const Filters = ({ activeTab, viewMode }) => {
 
       <div>
         <label htmlFor="searchInput" className="block text-gray-700 text-sm font-bold mb-2">
-          {searchLabel}
+          {renderSearchLabel()}
         </label>
         <input
           type="text"
           id="searchInput"
-          placeholder={searchPlaceholder}
+          placeholder="Enter search text"
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
         />
       </div>

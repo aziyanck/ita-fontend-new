@@ -62,6 +62,7 @@ const ProductDashboard = ({ onTabChange, onViewModeChange }) => {
         {activeTab === 'components' && (
           <ComponentsTable data={tableData} onViewModeChange={onViewModeChange} />
         )}
+
         {activeTab === 'purchase' && (
           <PurchasesTable data={tableData} setSelectedInvoice={setSelectedInvoice} />
         )}

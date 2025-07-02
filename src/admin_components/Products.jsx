@@ -4,6 +4,7 @@ import ProductDashboard from './sub_admins/ProductDashboard';
 import Filters from './sub_admins/Filters';
 
 const ProductComponent = () => {
+  
   const [currentTab, setCurrentTab] = useState('components');
   const [currentViewMode, setCurrentViewMode] = useState('product');
 
