@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from "react"
 import { updateComponentQty, getComponentDetails, getAllComponents } from "./supabaseServices"
-import { supabase } from "./supabaseClient"
 
 const XIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -236,6 +235,20 @@ function InvoiceManager() {
             newItems[index].componentId = null; // Clear component ID
         }
     }
+
+    if (field === 'qty') {
+        const componentName = newItems[index].name;
+        if (componentName) {
+            const component = componentOptions.find(c => c.name === componentName);
+            if (component) {
+                const requestedQty = parseFloat(value);
+                if (requestedQty > component.qty) {
+                    showMessageBox(`Not enough stock for "${component.name}". Only ${component.qty} available.`);
+                    newItems[index][field] = component.qty.toString();
+                }
+            }
+        }
+    }
     setInvoiceData(prev => ({
         ...prev,
         invoice: { ...prev.invoice, items: newItems }
@@ -301,6 +314,12 @@ function InvoiceManager() {
       const componentExists = componentOptions.some(c => c.name === item.name);
       if (!componentExists) {
           showMessageBox(`Item #${i + 1}: "${item.name}" is not a valid component.`);
+          return false;
+      }
+
+      const component = componentOptions.find(c => c.name === item.name);
+      if (component && parseFloat(item.qty) > component.qty) {
+          showMessageBox(`Not enough stock for "${item.name}". Only ${component.qty} available.`);
           return false;
       }
     }
