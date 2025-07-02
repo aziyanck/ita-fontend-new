@@ -196,6 +196,7 @@ const AddPurchase = ({ onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Resolve dealer
       let dealerRecord = await getDealerByName(invoiceInfo.dealer);
       if (!dealerRecord) {
         dealerRecord = await insertDealer(invoiceInfo.dealer);
@@ -205,14 +206,23 @@ const AddPurchase = ({ onClose }) => {
       }
       const dealerId = dealerRecord.id;
 
+      // 🚨 Calculate total amount
+      const totalAmount = items.reduce((sum, item) =>
+        sum + (parseFloat(item.qty) * parseFloat(item.price)), 0);
+
+      const gstRate = 0.18; // 18% GST
+      const totalWithGST = totalAmount + (totalAmount * gstRate);
+
+      // Insert invoice with total_amount (including GST)
       const invoiceData = {
         date: invoiceInfo.date,
         invoice_no: invoiceInfo.invoiceNo,
         invoice_type: "purchase",
         url: "",
+        total_amount: totalWithGST,
       };
       const invoice = await insertInvoice(invoiceData);
-      console.log("Invoice inserted:", invoice);
+      console.log("Invoice inserted with GST:", invoice);
 
       const componentIds = [];
 
@@ -249,7 +259,6 @@ const AddPurchase = ({ onClose }) => {
         componentIds.push(componentId);
       }
 
-
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
         const purchaseData = {
@@ -270,6 +279,7 @@ const AddPurchase = ({ onClose }) => {
       alert("Something went wrong while saving. Please check the console for details.");
     }
   };
+
 
   return (
     <div className="fixed inset-0 z-50 flex py-15 items-center text-gray-600 justify-center h-full bg-black/30 backdrop-blur-sm p-4">
