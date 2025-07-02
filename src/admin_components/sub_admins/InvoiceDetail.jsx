@@ -23,8 +23,12 @@ const InvoiceDetail = ({ invoiceNo, onClose }) => {
     }
   }, [invoiceNo]);
 
+  const finalAmount = useMemo(() => {
+    return invoiceData?.total_amount || 0;
+  }, [invoiceData]);
+
   // Memoized calculation for the total amount
-  const totalAmount = useMemo(() => {
+  const totalProductAmount = useMemo(() => {
     if (!invoiceData?.purchase_items) return 0;
     return invoiceData.purchase_items.reduce(
       (sum, item) => sum + item.price * item.qty,
@@ -35,7 +39,7 @@ const InvoiceDetail = ({ invoiceNo, onClose }) => {
   // Memoized calculation to get a unique list of dealers
   const dealerNames = useMemo(() => {
     if (!invoiceData?.purchase_items) return 'N/A';
-    
+
     // Create a set of all dealer names to ensure uniqueness
 
     const dealers = new Set(
@@ -69,7 +73,7 @@ const InvoiceDetail = ({ invoiceNo, onClose }) => {
         ) : invoiceData ? (
           <div className="space-y-6">
             {/* Invoice Summary Section */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm bg-gray-50 p-4 rounded-lg border">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm bg-gray-50 p-4 rounded-lg border">
               <div>
                 <strong className="block text-gray-500 font-medium">Dealer(s)</strong>
                 <span className="text-gray-800 text-base">{dealerNames}</span>
@@ -79,9 +83,15 @@ const InvoiceDetail = ({ invoiceNo, onClose }) => {
                 <span className="text-gray-800 text-base">{new Date(invoiceData.date).toLocaleDateString()}</span>
               </div>
               <div>
-                <strong className="block text-gray-500 font-medium">Total Amount</strong>
+                <strong className="block text-gray-500 font-medium">Total Products Amount</strong>
                 <span className="text-gray-800 text-base font-semibold">
-                  ₹ {totalAmount.toFixed(2)}
+                  ₹ {totalProductAmount.toFixed(2)}
+                </span>
+              </div>
+              <div>
+                <strong className="block text-gray-500 font-medium">Final Amount (with GST)</strong>
+                <span className="text-gray-800 text-base font-semibold">
+                  ₹ {finalAmount.toFixed(2)}
                 </span>
               </div>
             </div>

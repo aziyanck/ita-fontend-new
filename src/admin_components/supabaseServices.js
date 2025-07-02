@@ -164,6 +164,7 @@ export const getInvoiceDetails = async (invoiceNo) => {
       `
       invoice_no,
       date,
+      total_amount,
       purchase_items (
         id,
         qty,
