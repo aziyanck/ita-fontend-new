@@ -16,9 +16,9 @@ const ComponentsTable = ({ data }) => {
     }, [data, byHSN]);
 
     return (
-        <div className="flex flex-col justify-center gap-5 items-center w-full">
+        <div className="flex  flex-col justify-center items-start  gap-5  w-full">
             <button
-                className="px-4 py-2 rounded self-end bg-blue-600 text-white"
+                className="px-4  py-2 rounded bg-blue-600 text-white"
                 onClick={() => setByHSN(prev => !prev)}
             >
                 {byHSN ? "By Product" : "By HSN"}

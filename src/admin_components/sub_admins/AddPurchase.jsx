@@ -40,8 +40,8 @@ const Combobox = ({ options, value, onChange, placeholder }) => {
   const filteredOptions = query === ''
     ? options
     : options.filter(option =>
-        option.toLowerCase().replace(/\s+/g, '').includes(query.toLowerCase().replace(/\s+/g, ''))
-      );
+      option.toLowerCase().replace(/\s+/g, '').includes(query.toLowerCase().replace(/\s+/g, ''))
+    );
 
   const handleInputChange = (e) => {
     const newValue = e.target.value;
@@ -66,7 +66,7 @@ const Combobox = ({ options, value, onChange, placeholder }) => {
           onFocus={() => setIsOpen(true)}
           onKeyDown={(e) => { if (e.key === 'Escape') setIsOpen(false); }}
           placeholder={placeholder}
-           required 
+          required
           className="w-full p-2 pr-10 border rounded-md bg-white"
         />
         <button
@@ -104,12 +104,13 @@ const Combobox = ({ options, value, onChange, placeholder }) => {
 const AddPurchase = ({ onClose }) => {
   const [productOptions, setProductOptions] = useState([]);
   const [dealerOptions, setDealerOptions] = useState([]);
+  const [categoryOptions, setCategoryOptions] = useState([]);
   const [invoiceInfo, setInvoiceInfo] = useState({
     date: new Date().toISOString().split('T')[0],
     invoiceNo: '',
     dealer: '',
   });
-  const [items, setItems] = useState([{ id: 1, name: '', hsn: '', qty: 1, price: '', brand: '' }]);
+  const [items, setItems] = useState([{ id: 1, name: '', hsn: '', qty: 1, price: '', brand: '', category: '' }]);
   const [nextId, setNextId] = useState(2);
 
   useEffect(() => {
@@ -133,8 +134,19 @@ const AddPurchase = ({ onClose }) => {
       }
     };
 
+    const fetchCategories = async () => {
+      try {
+        const { data: categories, error } = await supabase.from('category').select('*');
+        if (error) throw error;
+        setCategoryOptions(categories);
+      } catch (e) {
+        console.error("Error fetching categories:", e);
+      }
+    };
+
     fetchProducts();
     fetchDealers();
+    fetchCategories();
   }, []);
 
   const handleInfoChange = (e) => {
@@ -149,12 +161,19 @@ const AddPurchase = ({ onClose }) => {
       const existingComp = productOptions.find(p => p.name === value);
       if (existingComp) {
         setItems(prev => prev.map(item => item.id === id
-          ? { ...item, hsn: existingComp.hsn, brand: existingComp.brand }
+          ? {
+            ...item,
+            hsn: existingComp.hsn,
+            brand: existingComp.brand,
+            category: existingComp.category_id
+              ? categoryOptions.find(c => c.id === existingComp.category_id)?.name || ''
+              : ''
+          }
           : item
         ));
       } else {
         setItems(prev => prev.map(item => item.id === id
-          ? { ...item, hsn: '', brand: '' }
+          ? { ...item, hsn: '', brand: '', category: '' }
           : item
         ));
       }
@@ -162,7 +181,7 @@ const AddPurchase = ({ onClose }) => {
   };
 
   const handleAddItem = () => {
-    setItems([...items, { id: nextId, name: '', hsn: '', qty: 1, price: '', brand: '' }]);
+    setItems([...items, { id: nextId, name: '', hsn: '', qty: 1, price: '', brand: '', category: '' }]);
     setNextId(prev => prev + 1);
   };
 
@@ -177,7 +196,6 @@ const AddPurchase = ({ onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Resolve dealer
       let dealerRecord = await getDealerByName(invoiceInfo.dealer);
       if (!dealerRecord) {
         dealerRecord = await insertDealer(invoiceInfo.dealer);
@@ -201,7 +219,6 @@ const AddPurchase = ({ onClose }) => {
       for (const item of items) {
         const existingComp = productOptions.find(p =>
           p.name === item.name &&
-          p.dealer_id === dealerId &&
           p.brand === item.brand
         );
 
@@ -214,6 +231,7 @@ const AddPurchase = ({ onClose }) => {
           console.log("Component updated:", updatedComponent);
           componentId = existingComp.id;
         } else {
+          const selectedCategory = categoryOptions.find(c => c.name === item.category);
           const componentData = {
             name: item.name,
             hsn: item.hsn,
@@ -221,6 +239,7 @@ const AddPurchase = ({ onClose }) => {
             description: "",
             qty: parseInt(item.qty),
             dealer_id: dealerId,
+            category_id: selectedCategory ? selectedCategory.id : null,
           };
           const newComponent = await insertComponent(componentData);
           console.log("New component inserted:", newComponent);
@@ -229,6 +248,7 @@ const AddPurchase = ({ onClose }) => {
 
         componentIds.push(componentId);
       }
+
 
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
@@ -253,7 +273,7 @@ const AddPurchase = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex py-15 items-center text-gray-600 justify-center h-full bg-black/30 backdrop-blur-sm p-4">
-      <div className="relative max-w-4xl w-full bg-white mt-10 rounded-2xl shadow-2xl overflow-y-auto max-h-screen">
+      <div className="relative max-w-5xl w-full bg-white mt-10 rounded-2xl shadow-2xl overflow-y-auto max-h-screen">
         <div className="p-6 md:p-8">
           <button
             onClick={onClose}
@@ -277,7 +297,7 @@ const AddPurchase = ({ onClose }) => {
               <div>
                 <label htmlFor="invoiceNo" className="block text-sm font-medium text-gray-700 mb-1">Invoice No.</label>
                 <input
-                  type="text" id="invoiceNo" name="invoiceNo"  required  value={invoiceInfo.invoiceNo} onChange={handleInfoChange}
+                  type="text" id="invoiceNo" name="invoiceNo" required value={invoiceInfo.invoiceNo} onChange={handleInfoChange}
                   placeholder="e.g., INV-001"
                   className="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
@@ -295,26 +315,33 @@ const AddPurchase = ({ onClose }) => {
 
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-gray-800 border-b border-gray-200 pb-2">Items</h2>
-              <div className="hidden md:grid md:grid-cols-[2fr_1fr_0.5fr_1fr_1fr_auto] gap-4 text-sm font-medium text-gray-500 px-2">
+              <div className="hidden md:grid md:grid-cols-[2fr_1fr_0.5fr_1fr_1fr_1fr_auto] gap-4 text-sm font-medium text-gray-500 px-2">
                 <span>Name</span>
                 <span>HSN</span>
                 <span>Qty</span>
                 <span>Price</span>
                 <span>Brand</span>
+                <span>Category</span>
               </div>
 
               {items.map((item) => (
-                <div key={item.id} className="grid grid-cols-1 md:grid-cols-[2fr_1fr_0.5fr_1fr_1fr_auto] gap-4 items-start p-3 bg-gray-50/50 text-gray-600 rounded-lg">
+                <div key={item.id} className="grid grid-cols-1 md:grid-cols-[2fr_1fr_0.5fr_1fr_1fr_1fr_auto] gap-4 items-start p-3 bg-gray-50/50 text-gray-600 rounded-lg">
                   <Combobox
                     options={[...new Set(productOptions.map(opt => opt.name))]}
                     value={item.name}
                     onChange={(value) => handleItemChange(item.id, 'name', value)}
                     placeholder="Search or add new item..."
                   />
-                  <input type="text" name="hsn"  required  value={item.hsn} onChange={(e) => handleItemChange(item.id, e.target.name, e.target.value)} placeholder="HSN Code" className="w-full p-2 border rounded-md bg-white" />
-                  <input type="number" name="qty"  required  value={item.qty} onChange={(e) => handleItemChange(item.id, e.target.name, e.target.value)} placeholder="1" className="w-full p-2 border rounded-md bg-white" />
-                  <input type="number" name="price"  required  value={item.price} onChange={(e) => handleItemChange(item.id, e.target.name, e.target.value)} placeholder="0.00" className="w-full p-2 border rounded-md bg-white" />
-                  <input type="text" name="brand"  value={item.brand} onChange={(e) => handleItemChange(item.id, e.target.name, e.target.value)} placeholder="Brand" className="w-full p-2 border rounded-md bg-white" />
+                  <input type="text" name="hsn" required value={item.hsn} onChange={(e) => handleItemChange(item.id, e.target.name, e.target.value)} placeholder="HSN Code" className="w-full p-2 border rounded-md bg-white" />
+                  <input type="number" name="qty" required value={item.qty} onChange={(e) => handleItemChange(item.id, e.target.name, e.target.value)} placeholder="1" className="w-full p-2 border rounded-md bg-white" />
+                  <input type="number" name="price" required value={item.price} onChange={(e) => handleItemChange(item.id, e.target.name, e.target.value)} placeholder="0.00" className="w-full p-2 border rounded-md bg-white" />
+                  <input type="text" name="brand" value={item.brand} onChange={(e) => handleItemChange(item.id, e.target.name, e.target.value)} placeholder="Brand" className="w-full p-2 border rounded-md bg-white" />
+                  <Combobox
+                    options={categoryOptions.map(c => c.name)}
+                    value={item.category}
+                    onChange={(value) => handleItemChange(item.id, 'category', value)}
+                    placeholder="Select or add category..."
+                  />
                   <div className="flex items-center h-full justify-end md:justify-center">
                     <button type="button" onClick={() => handleRemoveItem(item.id)} className="p-2 text-red-500 hover:bg-red-100 rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed" disabled={items.length <= 1}>
                       <XIcon />
