@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { getAllComponents, getPurchasesSummary } from '../supabaseServices';
 import InvoiceDetail from './InvoiceDetail';
 import ComponentsTable from './ComponentsTable';
 
-const ProductDashboard = ({ onTabChange, onViewModeChange }) => {
-  const [activeTab, setActiveTab] = useState('components'); // components | purchase | sell
+const ProductDashboard = ({ onTabChange, onViewModeChange, viewMode, searchQuery, dateRange }) => {
+
+  const [activeTab, setActiveTab] = useState('components');
   const [tableData, setTableData] = useState([]);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
 
@@ -23,7 +24,7 @@ const ProductDashboard = ({ onTabChange, onViewModeChange }) => {
           const data = await getPurchasesSummary();
           setTableData(data);
         } else if (activeTab === 'sell') {
-          setTableData([]); // placeholder since sell isn't implemented
+          setTableData([]);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -33,9 +34,45 @@ const ProductDashboard = ({ onTabChange, onViewModeChange }) => {
     fetchData();
   }, [activeTab]);
 
+  const filteredData = useMemo(() => {
+    if (!searchQuery && (!dateRange.from || !dateRange.to)) return tableData;
+
+    let filtered = tableData;
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(item => {
+        if (activeTab === 'components') {
+          let searchField = '';
+          if (viewMode === 'category') {
+            searchField = (item.category?.name || '').toLowerCase();
+          } else {
+            searchField = (item.name || '').toLowerCase();
+          }
+          return searchField.includes(query);
+        }
+        if (activeTab === 'purchase' || activeTab === 'sell') {
+          return (item.invoice_no || '').toLowerCase().includes(query);
+        }
+        return false;
+      });
+    }
+
+
+    if ((activeTab === 'purchase' || activeTab === 'sell') && dateRange.from && dateRange.to) {
+      filtered = filtered.filter(item => {
+        const itemDate = new Date(item.date);
+        const fromDate = new Date(dateRange.from);
+        const toDate = new Date(dateRange.to);
+        return itemDate >= fromDate && itemDate <= toDate;
+      });
+    }
+
+    return filtered;
+  }, [tableData, searchQuery, dateRange, activeTab, onViewModeChange]);
+
   return (
     <div className="bg-gray-200 p-4 max-w-screen md:w-full h-auto text-gray-600 mx-auto rounded-lg shadow-md">
-      {/* Tab Buttons */}
       <div className="flex space-x-2 mb-4">
         <button
           onClick={() => handleTabSwitch('components')}
@@ -57,14 +94,13 @@ const ProductDashboard = ({ onTabChange, onViewModeChange }) => {
         </button>
       </div>
 
-      {/* Table Container */}
       <div className="border border-gray-300 rounded-md overflow-x-scroll bg-green-100 p-4 min-h-[200px]">
         {activeTab === 'components' && (
-          <ComponentsTable data={tableData} onViewModeChange={onViewModeChange} />
+          <ComponentsTable data={filteredData} onViewModeChange={onViewModeChange} />
         )}
 
         {activeTab === 'purchase' && (
-          <PurchasesTable data={tableData} setSelectedInvoice={setSelectedInvoice} />
+          <PurchasesTable data={filteredData} setSelectedInvoice={setSelectedInvoice} />
         )}
         {activeTab === 'sell' && (
           <div className="text-gray-500 text-center py-8">
@@ -83,7 +119,6 @@ const ProductDashboard = ({ onTabChange, onViewModeChange }) => {
   );
 };
 
-/* Purchases Table */
 const PurchasesTable = ({ data, setSelectedInvoice }) => (
   <div>
     <table className="min-w-full text-left">

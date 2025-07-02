@@ -4,24 +4,18 @@ import ProductDashboard from './sub_admins/ProductDashboard';
 import Filters from './sub_admins/Filters';
 
 const ProductComponent = () => {
-  
   const [currentTab, setCurrentTab] = useState('components');
   const [currentViewMode, setCurrentViewMode] = useState('product');
 
   const [showAddPurchase, setShowAddPurchase] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  const handleAddPurchaseClick = () => {
-    setShowAddPurchase(true);
-  };
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dateRange, setDateRange] = useState({ from: '', to: '' });
 
-  const handleCloseAddPurchase = () => {
-    setShowAddPurchase(false);
-  };
-
-  const handleFilterClick = () => {
-    setShowFilters(prev => !prev);
-  };
+  const handleAddPurchaseClick = () => setShowAddPurchase(true);
+  const handleCloseAddPurchase = () => setShowAddPurchase(false);
+  const handleFilterClick = () => setShowFilters(prev => !prev);
 
   return (
     <div className="bg-gray-200 p-4 w-screen md:w-full h-auto mx-auto">
@@ -54,6 +48,8 @@ const ProductComponent = () => {
           <Filters
             activeTab={currentTab}
             viewMode={currentViewMode}
+            onSearch={setSearchQuery}
+            onDateRange={setDateRange}
           />
         </div>
       )}
@@ -62,7 +58,11 @@ const ProductComponent = () => {
         <ProductDashboard
           onTabChange={setCurrentTab}
           onViewModeChange={setCurrentViewMode}
+          viewMode={currentViewMode} // ✅ ADD THIS
+          searchQuery={searchQuery}
+          dateRange={dateRange}
         />
+
       </div>
 
       {showAddPurchase && (
