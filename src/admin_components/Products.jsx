@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
-import AddPurchase from './sub_admins/AddPurchase'; // Make sure the path is correct!
+import AddPurchase from './sub_admins/AddPurchase';
 import ProductDashboard from './sub_admins/ProductDashboard';
+import Filters from './sub_admins/Filters';
 
 const ProductComponent = () => {
+  const [currentTab, setCurrentTab] = useState('components');
+  const [currentViewMode, setCurrentViewMode] = useState('product');
+
   const [showAddPurchase, setShowAddPurchase] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   const handleAddPurchaseClick = () => {
     setShowAddPurchase(true);
@@ -13,9 +18,12 @@ const ProductComponent = () => {
     setShowAddPurchase(false);
   };
 
+  const handleFilterClick = () => {
+    setShowFilters(prev => !prev);
+  };
+
   return (
     <div className="bg-gray-200 p-4 w-screen md:w-full h-auto mx-auto">
-
       <div className="flex justify-end items-center mb-4">
         <button
           onClick={handleAddPurchaseClick}
@@ -26,21 +34,34 @@ const ProductComponent = () => {
       </div>
 
       <div className="flex justify-end items-center gap-5 mb-4">
-
         <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded flex items-center">
           Download XLS
         </button>
         <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded flex items-center">
           Download CSV
         </button>
-
-        <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded flex items-center">
+        <button
+          className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded flex items-center"
+          onClick={handleFilterClick}
+        >
           Filter
         </button>
       </div>
 
-      <div className="border border-gray-300 rounded-md  bg-gray-50 h-full p-4">
-        <ProductDashboard/>
+      {showFilters && (
+        <div className="w-full mt-4">
+          <Filters
+            activeTab={currentTab}
+            viewMode={currentViewMode}
+          />
+        </div>
+      )}
+
+      <div className="border border-gray-300 rounded-md bg-gray-50 h-full p-4">
+        <ProductDashboard
+          onTabChange={setCurrentTab}
+          onViewModeChange={setCurrentViewMode}
+        />
       </div>
 
       {showAddPurchase && (
