@@ -44,7 +44,7 @@ const ProductComponent = () => {
       </div>
 
       {showFilters && (
-        <div className="w-full mt-4">
+        <div className="w-full  mt-4 md:flex justify-end ">
           <Filters
             activeTab={currentTab}
             viewMode={currentViewMode}

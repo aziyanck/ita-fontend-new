@@ -29,7 +29,7 @@ const Filters = ({ activeTab, viewMode, onSearch, onDateRange }) => {
     };
 
     return (
-        <div className="bg-white p-4 rounded-lg shadow-md">
+        <div className="bg-white p-4 md:min-w-[30vw] md:max-w-3xl rounded-lg shadow-md">
             <h2 className="text-lg font-semibold mb-4">Filter</h2>
 
             {(activeTab === 'purchase' || activeTab === 'sell') && (
