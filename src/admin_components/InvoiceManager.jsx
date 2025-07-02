@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from "react"
-import { updateComponentQty, getComponentDetails, getAllComponents } from "./supabaseServices"
+import { updateComponentQty, getComponentDetails, getAllComponents, getLatestInvoiceNumber } from "./supabaseServices"
 
 const XIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -159,6 +159,21 @@ function InvoiceManager() {
       }
     };
     fetchComponents();
+
+    const fetchLatestInvoiceNumber = async () => {
+      const latestInvoiceNo = await getLatestInvoiceNumber();
+      if (latestInvoiceNo) {
+        const parts = latestInvoiceNo.split('/');
+        const lastPart = parseInt(parts[parts.length - 1], 10);
+        const newPart = (lastPart + 1).toString().padStart(2, '0');
+        const newInvoiceNo = `ITA/25-26/${newPart}`;
+        setInvoiceData(prev => ({ ...prev, invoice: { ...prev.invoice, number: newInvoiceNo } }));
+      } else {
+        setInvoiceData(prev => ({ ...prev, invoice: { ...prev.invoice, number: 'ITA/25-26/01' } }));
+      }
+    };
+
+    fetchLatestInvoiceNumber();
   }, []);
 
 

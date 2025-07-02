@@ -184,3 +184,20 @@ export const getInvoiceDetails = async (invoiceNo) => {
   if (error) throw error;
   return data;
 };
+
+
+export const getLatestInvoiceNumber = async () => {
+  const { data, error } = await supabase
+    .from('invoices')
+    .select('invoice_no')
+    .eq('invoice_type', 'sell')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error && error.code !== 'PGRST116') { 
+    throw error;
+  }
+
+  return data ? data.invoice_no : null;
+};
