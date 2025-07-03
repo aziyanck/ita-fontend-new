@@ -173,6 +173,33 @@ export const getSalesInvoiceDetails = async (invoiceNo) => {
 };
 
 
+export const getInvoiceDetails = async (invoiceNo) => {
+  const { data, error } = await supabase
+    .from("invoices")
+    .select(
+      `
+      invoice_no,
+      date,
+      total_amount,
+      purchase_items (
+        id,
+        qty,
+        price,
+        component:comp_id (
+          name,
+          hsn,
+          brand,
+          dealer:dealer_id ( name ) 
+        )
+      )
+    `
+    )
+    .eq("invoice_no", invoiceNo)
+    .single();
+
+  if (error) throw error;
+  return data;
+};
 
 
 export const getLatestInvoiceNumber = async () => {
