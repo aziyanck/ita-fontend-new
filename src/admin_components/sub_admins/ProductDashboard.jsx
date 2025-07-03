@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { getAllComponents, getPurchasesSummary } from '../supabaseServices';
+import { getAllComponents, getPurchasesSummary, getSellsSummary } from '../supabaseServices';
 import InvoiceDetail from './InvoiceDetail';
 import ComponentsTable from './ComponentsTable';
+import SalesInvoiceDetail from './SalesInvoiceDetail';
+
 
 const ProductDashboard = ({
   onTabChange,
@@ -9,9 +11,8 @@ const ProductDashboard = ({
   viewMode,
   searchQuery,
   dateRange,
-  filtersEnabled, // ✅ new prop
+  filtersEnabled, // ✅ filter toggle prop
 }) => {
-
   const [activeTab, setActiveTab] = useState('components');
   const [tableData, setTableData] = useState([]);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
@@ -31,7 +32,8 @@ const ProductDashboard = ({
           const data = await getPurchasesSummary();
           setTableData(data);
         } else if (activeTab === 'sell') {
-          setTableData([]);
+          const data = await getSellsSummary(); // ✅ Fetch sells
+          setTableData(data);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -77,7 +79,6 @@ const ProductDashboard = ({
     return filtered;
   }, [tableData, searchQuery, dateRange, activeTab, viewMode, filtersEnabled]);
 
-
   return (
     <div className="bg-gray-200 p-4 max-w-screen md:w-full h-auto text-gray-600 mx-auto rounded-lg shadow-md">
       <div className="flex space-x-2 mb-4">
@@ -109,23 +110,31 @@ const ProductDashboard = ({
         {activeTab === 'purchase' && (
           <PurchasesTable data={filteredData} setSelectedInvoice={setSelectedInvoice} />
         )}
+
         {activeTab === 'sell' && (
-          <div className="text-gray-500 text-center py-8">
-            Sell functionality coming soon...
-          </div>
+          <SellsTable data={filteredData} setSelectedInvoice={setSelectedInvoice} />
         )}
       </div>
 
       {selectedInvoice && (
-        <InvoiceDetail
-          invoiceNo={selectedInvoice}
-          onClose={() => setSelectedInvoice(null)}
-        />
+        activeTab === 'purchase' ? (
+          <InvoiceDetail
+            invoiceNo={selectedInvoice}
+            onClose={() => setSelectedInvoice(null)}
+          />
+        ) : activeTab === 'sell' ? (
+          <SalesInvoiceDetail
+            invoiceNo={selectedInvoice}
+            onClose={() => setSelectedInvoice(null)}
+          />
+        ) : null
       )}
+
     </div>
   );
 };
 
+// ✅ Purchases Table
 const PurchasesTable = ({ data, setSelectedInvoice }) => (
   <div>
     <table className="min-w-full text-left">
@@ -163,6 +172,65 @@ const PurchasesTable = ({ data, setSelectedInvoice }) => (
     </table>
   </div>
 );
+
+// ✅ Sells Table
+// ✅ Sells Table (without opening invoice details on click)
+const SellsTable = ({ data, setSelectedInvoice }) => {
+  const sortedData = useMemo(() => {
+  return [...data].sort((a, b) => {
+    const aNum = parseInt(a.invoice_no, 10);
+    const bNum = parseInt(b.invoice_no, 10);
+
+    if (!isNaN(aNum) && !isNaN(bNum)) {
+      return bNum - aNum; // numeric comparison
+    }
+
+    const aInv = a.invoice_no || '';
+    const bInv = b.invoice_no || '';
+    return bInv.localeCompare(aInv); // safe even if undefined
+  });
+}, [data]);
+
+
+  return (
+    <div>
+      <table className="min-w-full text-left">
+        <thead>
+          <tr className="border-b bg-gray-100">
+            <th className="px-4 py-2">Sl No.</th>
+            <th className="px-4 py-2">Invoice No.</th>
+            <th className="px-4 py-2">Total Amount</th>
+            <th className="px-4 py-2">Customer</th>
+            <th className="px-4 py-2">Sale Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sortedData.map((sell, index) => (
+            <tr key={`${sell.invoice_no}-${index}`} className="border-b hover:bg-gray-50">
+              <td className="px-4 py-2">{index + 1}</td>
+              <td
+                className="px-4 py-2 text-blue-600 cursor-pointer"
+                onClick={() => setSelectedInvoice(sell.invoice_no)}
+              >
+                {sell.invoice_no}
+              </td>
+              <td className="px-4 py-2">₹ {(sell.total_amount ?? 0).toFixed(2)}</td>
+              <td className="px-4 py-2">
+                {typeof sell.customer === 'object'
+                  ? sell.customer?.name || 'N/A'
+                  : sell.customer || 'N/A'}
+              </td>
+              <td className="px-4 py-2">
+                {sell.date ? new Date(sell.date).toLocaleDateString() : 'N/A'}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
 
 
 export default ProductDashboard;

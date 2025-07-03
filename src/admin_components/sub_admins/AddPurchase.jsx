@@ -220,7 +220,9 @@ const AddPurchase = ({ onClose }) => {
         invoice_type: "purchase",
         url: "",
         total_amount: totalWithGST,
+        dealer_id: dealerId,    // ✅ link dealer directly to invoice
       };
+
       const invoice = await insertInvoice(invoiceData);
       console.log("Invoice inserted with GST:", invoice);
 

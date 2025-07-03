@@ -123,78 +123,56 @@ export const getAllComponents = async () => {
 export const getPurchasesSummary = async () => {
   const { data, error } = await supabase
     .from("invoices")
-    .select(
-      `
+    .select(`
       invoice_no,
       date,
       total_amount,
-      purchase_items:purchase_items (
-        qty,
-        price,
-        comp_id,
-        component:comp_id (
-          dealer:dealer_id (
-            name
-          )
-        )
-      )
-    `
-    )
+      dealer:dealer_id ( name )
+    `)
     .eq("invoice_type", "purchase")
     .order("date", { ascending: false });
 
   if (error) throw error;
 
-  const summaries = data.map((invoice) => {
-    let totalAmount = 0;
-    let dealerName = "N/A";
-
-    if (invoice.purchase_items && invoice.purchase_items.length > 0) {
-      
-      const firstDealer = invoice.purchase_items[0].component?.dealer?.name;
-      dealerName = firstDealer || "N/A";
-    }
-
-    return {
-      invoice_no: invoice.invoice_no,
-      date: invoice.date,
-      dealer: dealerName,
-      total_amount: invoice.total_amount
-      
-    };
-  });
-
-  return summaries;
+  return data.map(inv => ({
+    invoice_no: inv.invoice_no,
+    date: inv.date,
+    dealer: inv.dealer?.name || 'N/A',
+    total_amount: inv.total_amount,
+  }));
 };
 
+
 //display inv details
-export const getInvoiceDetails = async (invoiceNo) => {
+export const getSalesInvoiceDetails = async (invoiceNo) => {
   const { data, error } = await supabase
     .from("invoices")
-    .select(
-      `
+    .select(`
       invoice_no,
       date,
       total_amount,
-      purchase_items (
+      customer,
+      url,
+      sell_items (
         id,
         qty,
         price,
         component:comp_id (
           name,
           hsn,
-          brand,
-          dealer:dealer_id ( name ) 
+          brand
         )
       )
-    `
-    )
+    `)
     .eq("invoice_no", invoiceNo)
+    .eq("invoice_type", "sell")
     .single();
 
   if (error) throw error;
   return data;
 };
+
+
 
 
 export const getLatestInvoiceNumber = async () => {
@@ -212,3 +190,19 @@ export const getLatestInvoiceNumber = async () => {
 
   return data ? data.invoice_no : null;
 };
+
+
+export async function getSellsSummary() {
+  const { data, error } = await supabase
+    .from('invoices')
+    .select(`
+      invoice_no,
+      total_amount,
+      date,
+      customer
+    `)
+    .eq('invoice_type', 'sell');
+
+  if (error) throw error;
+  return data;
+}
