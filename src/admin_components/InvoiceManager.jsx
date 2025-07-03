@@ -445,6 +445,7 @@ function InvoiceManager() {
         invoice_no: invoiceData.invoice.number,
         invoice_type: "sell",
         total_amount: totals.total,
+        customer: invoiceData.customer.name,
         url: result.url,
       }
       await insertInvoice(invoicePayload)
