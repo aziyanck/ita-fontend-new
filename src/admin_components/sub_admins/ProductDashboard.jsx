@@ -85,7 +85,7 @@ const ProductDashboard = ({
           onClick={() => handleTabSwitch('components')}
           className={`px-4 py-2 rounded ${activeTab === 'components' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-800'}`}
         >
-          Components
+          Stocks
         </button>
         <button
           onClick={() => handleTabSwitch('purchase')}
@@ -101,7 +101,7 @@ const ProductDashboard = ({
         </button>
       </div>
 
-      <div className="border border-gray-300 rounded-md overflow-x-scroll bg-green-100 p-4 min-h-[200px]">
+      <div className="border border-gray-300 rounded-md overflow-x-scroll bg-gray-100 p-4 min-h-[200px]">
         {activeTab === 'components' && (
           <ComponentsTable data={filteredData} onViewModeChange={onViewModeChange} />
         )}
