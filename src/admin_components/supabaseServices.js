@@ -35,6 +35,17 @@ export const insertPurchaseItem = async (purchaseData) => {
   return data;
 };
 
+// 4) Insert a sell item
+export const insertSellItem = async (sellItemData) => {
+  const { data, error } = await supabase
+    .from("sell_items")
+    .insert([sellItemData])
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+};
+
 export const getComponentDetails = async (componentId = null) => {
   let query = supabase.from("components").select("*");
 
@@ -47,7 +58,7 @@ export const getComponentDetails = async (componentId = null) => {
   return data;
 };
 
-// 4) Update component quantity
+// 5) Update component quantity
 export const updateComponentQty = async (compId, newQty) => {
   const { data, error } = await supabase
     .from("components")

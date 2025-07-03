@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from "react"
-import { updateComponentQty, getComponentDetails, getAllComponents, getLatestInvoiceNumber } from "./supabaseServices"
+import { updateComponentQty, getComponentDetails, getAllComponents, getLatestInvoiceNumber, insertInvoice, insertSellItem } from "./supabaseServices"
 
 const XIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -393,12 +393,30 @@ function InvoiceManager() {
 
       setGenerationStatus("success");
 
-      // Update component quantities and refresh list
+      // Insert into invoices table
+      const invoicePayload = {
+        date: invoiceData.invoice.date,
+        invoice_no: invoiceData.invoice.number,
+        invoice_type: "sell",
+        total_amount: totals.total,
+      };
+      await insertInvoice(invoicePayload);
+
+      // Update component quantities and insert into sell_items table
       for (const item of processedItems) {
         if (item.componentId) {
           const currentComponent = await getComponentDetails(item.componentId);
           const newQty = currentComponent.qty - item.qty;
           await updateComponentQty(item.componentId, newQty);
+
+          const sellItemPayload = {
+            comp_id: item.componentId,
+            invoice_no: invoiceData.invoice.number,
+            qty: item.qty,
+            price: item.unitPrice,
+            date: invoiceData.invoice.date,
+          };
+          await insertSellItem(sellItemPayload);
         }
       }
 
