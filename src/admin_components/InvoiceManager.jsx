@@ -1,51 +1,87 @@
 import React, { useState, useMemo, useEffect, useRef } from "react"
-import { updateComponentQty, getComponentDetails, getAllComponents, getLatestInvoiceNumber, insertInvoice, insertSellItem } from "./supabaseServices"
+import {
+  updateComponentQty,
+  getComponentDetails,
+  getAllComponents,
+  getLatestInvoiceNumber,
+  insertInvoice,
+  insertSellItem,
+} from "./supabaseServices"
 
 const XIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-5 w-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M6 18L18 6M6 6l12 12"
+    />
   </svg>
-);
+)
 
 const ChevronUpDownIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-400">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className="w-5 h-5 text-gray-400"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
+    />
   </svg>
-);
+)
 
 const Combobox = ({ options, value, onChange, placeholder }) => {
-  const [query, setQuery] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef(null);
+  const [query, setQuery] = useState("")
+  const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef(null)
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
-        setIsOpen(false);
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
+        setIsOpen(false)
       }
-    };
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, []);
+    }
+    document.addEventListener("mousedown", handleOutsideClick)
+    return () => document.removeEventListener("mousedown", handleOutsideClick)
+  }, [])
 
-  const filteredOptions = query === ''
-    ? options
-    : options.filter(option =>
-        option.toLowerCase().replace(/\s+/g, '').includes(query.toLowerCase().replace(/\s+/g, ''))
-      );
+  const filteredOptions =
+    query === ""
+      ? options
+      : options.filter((option) =>
+          option
+            .toLowerCase()
+            .replace(/\s+/g, "")
+            .includes(query.toLowerCase().replace(/\s+/g, "")),
+        )
 
   const handleInputChange = (e) => {
-    const newValue = e.target.value;
-    setQuery(newValue);
-    onChange(newValue);
-    if (!isOpen) setIsOpen(true);
-  };
+    const newValue = e.target.value
+    setQuery(newValue)
+    onChange(newValue)
+    if (!isOpen) setIsOpen(true)
+  }
 
   const handleOptionClick = (optionValue) => {
-    onChange(optionValue);
-    setQuery('');
-    setIsOpen(false);
-  };
+    onChange(optionValue)
+    setQuery("")
+    setIsOpen(false)
+  }
 
   return (
     <div className="relative w-full" ref={containerRef}>
@@ -55,9 +91,11 @@ const Combobox = ({ options, value, onChange, placeholder }) => {
           value={value}
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
-          onKeyDown={(e) => { if (e.key === 'Escape') setIsOpen(false); }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setIsOpen(false)
+          }}
           placeholder={placeholder}
-           required
+          required
           className="w-full p-2 pr-10 border rounded-md bg-white"
         />
         <button
@@ -89,12 +127,12 @@ const Combobox = ({ options, value, onChange, placeholder }) => {
         </ul>
       )}
     </div>
-  );
-};
+  )
+}
 
 // Main component that manages both the form and the preview state.
 function InvoiceManager() {
-  const [componentOptions, setComponentOptions] = useState([]);
+  const [componentOptions, setComponentOptions] = useState([])
   // State now includes a company object to be managed by the form.
   const [invoiceData, setInvoiceData] = useState({
     company: {
@@ -151,31 +189,36 @@ function InvoiceManager() {
   useEffect(() => {
     const fetchComponents = async () => {
       try {
-        const components = await getAllComponents();
-        setComponentOptions(components);
+        const components = await getAllComponents()
+        setComponentOptions(components)
       } catch (error) {
-        console.error("Error fetching components:", error);
-        showMessageBox("Could not load components. Please refresh.");
+        console.error("Error fetching components:", error)
+        showMessageBox("Could not load components. Please refresh.")
       }
-    };
-    fetchComponents();
+    }
+    fetchComponents()
 
     const fetchLatestInvoiceNumber = async () => {
-      const latestInvoiceNo = await getLatestInvoiceNumber();
+      const latestInvoiceNo = await getLatestInvoiceNumber()
       if (latestInvoiceNo) {
-        const parts = latestInvoiceNo.split('/');
-        const lastPart = parseInt(parts[parts.length - 1], 10);
-        const newPart = (lastPart + 1).toString().padStart(2, '0');
-        const newInvoiceNo = `ITA/25-26/${newPart}`;
-        setInvoiceData(prev => ({ ...prev, invoice: { ...prev.invoice, number: newInvoiceNo } }));
+        const parts = latestInvoiceNo.split("/")
+        const lastPart = parseInt(parts[parts.length - 1], 10)
+        const newPart = (lastPart + 1).toString().padStart(2, "0")
+        const newInvoiceNo = `ITA/25-26/${newPart}`
+        setInvoiceData((prev) => ({
+          ...prev,
+          invoice: { ...prev.invoice, number: newInvoiceNo },
+        }))
       } else {
-        setInvoiceData(prev => ({ ...prev, invoice: { ...prev.invoice, number: 'ITA/25-26/01' } }));
+        setInvoiceData((prev) => ({
+          ...prev,
+          invoice: { ...prev.invoice, number: "ITA/25-26/01" },
+        }))
       }
-    };
+    }
 
-    fetchLatestInvoiceNumber();
-  }, []);
-
+    fetchLatestInvoiceNumber()
+  }, [])
 
   // --- Helper Functions & Calculations ---
 
@@ -237,38 +280,40 @@ function InvoiceManager() {
   }
 
   const handleItemChange = (index, field, value) => {
-    const newItems = [...invoiceData.invoice.items];
-    newItems[index][field] = value;
+    const newItems = [...invoiceData.invoice.items]
+    newItems[index][field] = value
 
-    if (field === 'name') {
-        const selectedComponent = componentOptions.find(c => c.name === value);
-        if (selectedComponent) {
-            newItems[index].hsn = selectedComponent.hsn;
-            newItems[index].componentId = selectedComponent.id; // Save the component ID
-        } else {
-            newItems[index].hsn = ''; // Clear HSN if component not found
-            newItems[index].componentId = null; // Clear component ID
-        }
+    if (field === "name") {
+      const selectedComponent = componentOptions.find((c) => c.name === value)
+      if (selectedComponent) {
+        newItems[index].hsn = selectedComponent.hsn
+        newItems[index].componentId = selectedComponent.id // Save the component ID
+      } else {
+        newItems[index].hsn = "" // Clear HSN if component not found
+        newItems[index].componentId = null // Clear component ID
+      }
     }
 
-    if (field === 'qty') {
-        const componentName = newItems[index].name;
-        if (componentName) {
-            const component = componentOptions.find(c => c.name === componentName);
-            if (component) {
-                const requestedQty = parseFloat(value);
-                if (requestedQty > component.qty) {
-                    showMessageBox(`Not enough stock for "${component.name}". Only ${component.qty} available.`);
-                    newItems[index][field] = component.qty.toString();
-                }
-            }
+    if (field === "qty") {
+      const componentName = newItems[index].name
+      if (componentName) {
+        const component = componentOptions.find((c) => c.name === componentName)
+        if (component) {
+          const requestedQty = parseFloat(value)
+          if (requestedQty > component.qty) {
+            showMessageBox(
+              `Not enough stock for "${component.name}". Only ${component.qty} available.`,
+            )
+            newItems[index][field] = component.qty.toString()
+          }
         }
+      }
     }
-    setInvoiceData(prev => ({
-        ...prev,
-        invoice: { ...prev.invoice, items: newItems }
-    }));
-  };
+    setInvoiceData((prev) => ({
+      ...prev,
+      invoice: { ...prev.invoice, items: newItems },
+    }))
+  }
 
   const addItem = () => {
     setInvoiceData((prev) => ({
@@ -318,24 +363,25 @@ function InvoiceManager() {
       return false
     }
     for (let i = 0; i < invoiceData.invoice.items.length; i++) {
-      const item = invoiceData.invoice.items[i];
-      if (
-        !item.name.trim() ||
-        !item.hsn.trim()
-      ) {
+      const item = invoiceData.invoice.items[i]
+      if (!item.name.trim() || !item.hsn.trim()) {
         showMessageBox(`Item #${i + 1}: Description and HSN are required.`)
         return false
       }
-      const componentExists = componentOptions.some(c => c.name === item.name);
+      const componentExists = componentOptions.some((c) => c.name === item.name)
       if (!componentExists) {
-          showMessageBox(`Item #${i + 1}: "${item.name}" is not a valid component.`);
-          return false;
+        showMessageBox(
+          `Item #${i + 1}: "${item.name}" is not a valid component.`,
+        )
+        return false
       }
 
-      const component = componentOptions.find(c => c.name === item.name);
+      const component = componentOptions.find((c) => c.name === item.name)
       if (component && parseFloat(item.qty) > component.qty) {
-          showMessageBox(`Not enough stock for "${item.name}". Only ${component.qty} available.`);
-          return false;
+        showMessageBox(
+          `Not enough stock for "${item.name}". Only ${component.qty} available.`,
+        )
+        return false
       }
     }
     return true
@@ -355,7 +401,7 @@ function InvoiceManager() {
   }
 
   const handleGenerateInvoice = async () => {
-    setGenerationStatus("pending");
+    setGenerationStatus("pending")
 
     const processedItems = invoiceData.invoice.items.map((item) => ({
       ...item,
@@ -363,7 +409,7 @@ function InvoiceManager() {
       unitPrice: parseFloat(item.unitPrice) || 0,
       discount: parseFloat(item.discount) || 0,
       taxRate: parseFloat(item.taxRate) || 18,
-    }));
+    }))
 
     const payload = {
       company: invoiceData.company,
@@ -374,24 +420,24 @@ function InvoiceManager() {
       },
       email: invoiceData.customer.email,
       Installation: parseFloat(invoiceData.installationCharge) || 0,
-    };
+    }
 
-    const API_URL = "https://jobqueue.onrender.com/geninvoice";
-    console.log("Submitting to backend:", JSON.stringify(payload, null, 2));
+    const API_URL = "https://jobqueue.onrender.com/geninvoice"
+    console.log("Submitting to backend:", JSON.stringify(payload, null, 2))
 
     try {
       const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      });
+      })
 
-      const result = await response.json();
+      const result = await response.json()
       if (!response.ok) {
-        throw new Error(result.status || "Request failed");
+        throw new Error(result.status || "Request failed")
       }
 
-      setGenerationStatus("success");
+      setGenerationStatus("success")
 
       // Insert into invoices table
       const invoicePayload = {
@@ -399,15 +445,16 @@ function InvoiceManager() {
         invoice_no: invoiceData.invoice.number,
         invoice_type: "sell",
         total_amount: totals.total,
-      };
-      await insertInvoice(invoicePayload);
+        url: result.url,
+      }
+      await insertInvoice(invoicePayload)
 
       // Update component quantities and insert into sell_items table
       for (const item of processedItems) {
         if (item.componentId) {
-          const currentComponent = await getComponentDetails(item.componentId);
-          const newQty = currentComponent.qty - item.qty;
-          await updateComponentQty(item.componentId, newQty);
+          const currentComponent = await getComponentDetails(item.componentId)
+          const newQty = currentComponent.qty - item.qty
+          await updateComponentQty(item.componentId, newQty)
 
           const sellItemPayload = {
             comp_id: item.componentId,
@@ -415,21 +462,20 @@ function InvoiceManager() {
             qty: item.qty,
             price: item.unitPrice,
             date: invoiceData.invoice.date,
-          };
-          await insertSellItem(sellItemPayload);
+          }
+          await insertSellItem(sellItemPayload)
         }
       }
 
       // Refresh component list to get updated quantities
-      const updatedComponents = await getAllComponents();
-      setComponentOptions(updatedComponents);
-
+      const updatedComponents = await getAllComponents()
+      setComponentOptions(updatedComponents)
     } catch (error) {
-      console.error("Error submitting invoice job:", error);
-      setGenerationStatus(null);
-      showMessageBox(`Error: ${error.message}. Check console for details.`);
+      console.error("Error submitting invoice job:", error)
+      setGenerationStatus(null)
+      showMessageBox(`Error: ${error.message}. Check console for details.`)
     }
-  };
+  }
 
   // --- Render Logic ---
 
@@ -756,12 +802,14 @@ function InvoiceManager() {
                 {i + 1}
               </div>
               <div className="col-span-10 md:col-span-3">
-              <Combobox
-                options={[...new Set(componentOptions.map(opt => opt.name))]}
-                value={item.name}
-                onChange={(value) => handleItemChange(i, 'name', value)}
-                placeholder="Item/Service Description"
-              />
+                <Combobox
+                  options={[
+                    ...new Set(componentOptions.map((opt) => opt.name)),
+                  ]}
+                  value={item.name}
+                  onChange={(value) => handleItemChange(i, "name", value)}
+                  placeholder="Item/Service Description"
+                />
               </div>
               <input
                 className="col-span-12 md:col-span-2 px-3 py-2 border border-gray-300 rounded-md"
