@@ -1,34 +1,24 @@
 import React, { useState } from 'react';
 // Make sure to install lucide-react: npm install lucide-react
-import { LayoutDashboard, Users, ShoppingCart, Settings, Menu, X , Newspaper } from 'lucide-react';
+import { LayoutDashboard, Users, ShoppingCart, Settings, Menu, X ,HouseWifi, Newspaper } from 'lucide-react';
 
 import Dashboard from './admin_components/Dashbord'
 import GenerateQuotation from './admin_components/GenerateQuotation'
 import Products from './admin_components/Products'
 import InvoiceGenerator from './admin_components/InvoiceManager'
+import Projects from './admin_components/Projects'
 
 
 
 
-
-// --- Placeholder Components for Main Content ---
-// These components would typically be in their own files.
-
-
-
-
-
-
-
-
-// --- Main Layout Components ---
 
 const Sidebar = ({ activeComponent, setActiveComponent, isOpen, setIsOpen }) => {
     const navItems = [
         { name: 'Dashboard', icon: LayoutDashboard, component: 'Dashboard' },
         { name: 'Generate Quotation', icon: Newspaper, component: 'Generate Quotation' },
         { name: 'Products', icon: ShoppingCart, component: 'Products' },
-        {name: 'Generate Invoice', icon: Newspaper, component: 'Generate Invoice'}
+        {name: 'Generate Invoice', icon: Newspaper, component: 'Generate Invoice'},
+        {name: 'Projects', icon: HouseWifi, component: 'Projects'}
     ];
 
     return (
@@ -89,6 +79,8 @@ const MainContent = ({ activeComponent }) => {
                 return <Products />;
             case 'Generate Invoice':
                 return <InvoiceGenerator />;
+            case 'Projects':
+                return <Projects />;
             default:
                 return <Dashboard />;
         }
@@ -118,3 +110,4 @@ export default function Admin() {
         </div>
     );
 }
+
