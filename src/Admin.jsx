@@ -95,7 +95,7 @@ export default function Admin() {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <div className="h-auto min-h-screen w-screen flex bg-gray-100 font-sans">
+        <div className="h-screen min-h-screen w-screen flex bg-gray-100 font-sans">
             <Sidebar
                 activeComponent={activeComponent}
                 setActiveComponent={setActiveComponent}
@@ -103,7 +103,7 @@ export default function Admin() {
                 setIsOpen={setSidebarOpen}
             />
             {isSidebarOpen && <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black opacity-50 z-20 md:hidden"></div>}
-            <div className="flex-1 flex flex-col  h-auto">
+            <div className="flex-1 flex flex-col overflow-y-scroll h-auto">
                 <Navbar setIsOpen={setSidebarOpen} />
                 <MainContent activeComponent={activeComponent} />
             </div>

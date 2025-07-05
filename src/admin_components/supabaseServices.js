@@ -233,3 +233,49 @@ export async function getSellsSummary() {
   if (error) throw error;
   return data;
 }
+
+
+// for projects
+export async function getAllProjects() {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*'); // Fetch all columns
+
+  if (error) {
+    console.error('Error fetching projects:', error);
+    throw error; // Optional: rethrow to handle elsewhere
+  }
+
+  return data; // This will be an array of objects
+}
+
+
+
+export async function getProjectStatuses() {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('status'); // Only get the status field
+
+  if (error) {
+    console.error('Error fetching project statuses:', error);
+    throw error;
+  }
+
+  return data; // Array of objects like [{ status: 'In Progress' }, ...]
+}
+
+
+
+
+export async function getProjectProfits() {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('project_date, final_value');
+
+  if (error) {
+    console.error('Error fetching project profits:', error);
+    throw error;
+  }
+
+  return data; // array of objects [{project_date: '...', final_value: ...}, ...]
+}
