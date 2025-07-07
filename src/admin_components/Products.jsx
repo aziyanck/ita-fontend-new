@@ -29,12 +29,12 @@ const ProductComponent = () => {
       </div>
 
       <div className="flex justify-end items-center gap-5 mb-4">
-        <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded flex items-center">
+        {/* <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded flex items-center">
           Download XLS
         </button>
         <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded flex items-center">
           Download CSV
-        </button>
+        </button> */}
         <button
           className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded flex items-center"
           onClick={handleFilterClick}
