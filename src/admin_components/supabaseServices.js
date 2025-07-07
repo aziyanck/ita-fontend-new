@@ -270,7 +270,7 @@ export async function getProjectStatuses() {
 export async function getProjectProfits() {
   const { data, error } = await supabase
     .from('projects')
-    .select('project_date, final_value');
+    .select('project_date, profit');
 
   if (error) {
     console.error('Error fetching project profits:', error);

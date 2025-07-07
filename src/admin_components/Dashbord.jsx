@@ -133,7 +133,7 @@ const Dashboard = () => {
                     const profitsByMonth = data.reduce((acc, curr) => {
                         const date = new Date(curr.project_date);
                         const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; // e.g., 2025-07
-                        acc[monthKey] = (acc[monthKey] || 0) + (curr.final_value || 0);
+                        acc[monthKey] = (acc[monthKey] || 0) + (curr.profit || 0);
                         return acc;
                     }, {});
 
