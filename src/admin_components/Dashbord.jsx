@@ -140,19 +140,20 @@ const Dashboard = () => {
             try {
                 const data = await getProjectProfits();
                 if (data && data.length > 0) {
-                    // Group profits by month
-                    const profitsByMonth = data.reduce((acc, curr) => {
-                        const date = new Date(curr.project_date);
-                        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; // e.g., 2025-07
-                        acc[monthKey] = (acc[monthKey] || 0) + (curr.profit || 0);
-                        return acc;
-                    }, {});
+                    const profitsByMonth = data
+                        .filter((curr) => curr.status === 'Completed')
+                        .reduce((acc, curr) => {
+                            const date = new Date(curr.project_date);
+                            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                            acc[monthKey] = (acc[monthKey] || 0) + (curr.profit || 0);
+                            return acc;
+                        }, {});
 
-                    // Sort months chronologically
+
                     const sortedMonths = Object.keys(profitsByMonth).sort();
 
                     const lineData = sortedMonths.map((month) => ({
-                        name: month,        // e.g., "2025-07"
+                        name: month,
                         profit: profitsByMonth[month],
                     }));
 
@@ -168,6 +169,7 @@ const Dashboard = () => {
 
         fetchProfits();
     }, []);
+
 
     useEffect(() => {
         const fetchMonthlyProfits = async () => {

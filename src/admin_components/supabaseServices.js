@@ -259,18 +259,26 @@ export async function getProjectStatuses() {
   return data; // Array of objects like [{ status: 'In Progress' }, ...]
 }
 
+
 export async function getProjectProfits() {
+  const now = new Date();
+  const startOfYear = `${now.getFullYear()}-01-01`;
+  const endOfYear = `${now.getFullYear()}-12-31`;
+
   const { data, error } = await supabase
     .from("projects")
-    .select("project_date, profit");
+    .select("project_date, profit, status")
+    .gte("project_date", startOfYear)
+    .lte("project_date", endOfYear);
 
   if (error) {
     console.error("Error fetching project profits:", error);
     throw error;
   }
 
-  return data; // array of objects [{project_date: '...', final_value: ...}, ...]
+  return data; // only data within the current year
 }
+
 
 export async function getMonthlyProfitSums() {
   const now = new Date();
@@ -331,54 +339,62 @@ export async function getMonthlyProfitSums() {
   };
 }
 
-
-
 export async function getCompletedProjectCounts() {
-    const now = new Date();
+  const now = new Date();
 
-    // Start and end for current month
-    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
+  // Start and end for current month
+  const currentMonthStart = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    1
+  ).toISOString();
+  const nextMonthStart = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    1
+  ).toISOString();
 
-    // Start and end for previous month
-    const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
-    const currentMonthStartForPrev = currentMonthStart;
+  // Start and end for previous month
+  const prevMonthStart = new Date(
+    now.getFullYear(),
+    now.getMonth() - 1,
+    1
+  ).toISOString();
+  const currentMonthStartForPrev = currentMonthStart;
 
-    // --- Query current month completed projects count ---
-    const { count: currentCount, error: currentError } = await supabase
-        .from('projects')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'Completed')
-        .gte('project_date', currentMonthStart)
-        .lt('project_date', nextMonthStart);
+  // --- Query current month completed projects count ---
+  const { count: currentCount, error: currentError } = await supabase
+    .from("projects")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "Completed")
+    .gte("project_date", currentMonthStart)
+    .lt("project_date", nextMonthStart);
 
-    if (currentError) throw currentError;
+  if (currentError) throw currentError;
 
-    // --- Query previous month completed projects count ---
-    const { count: prevCount, error: prevError } = await supabase
-        .from('projects')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'Completed')
-        .gte('project_date', prevMonthStart)
-        .lt('project_date', currentMonthStartForPrev);
+  // --- Query previous month completed projects count ---
+  const { count: prevCount, error: prevError } = await supabase
+    .from("projects")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "Completed")
+    .gte("project_date", prevMonthStart)
+    .lt("project_date", currentMonthStartForPrev);
 
-    if (prevError) throw prevError;
+  if (prevError) throw prevError;
 
-    return {
-        currentMonth: currentCount || 0,
-        previousMonth: prevCount || 0,
-    };
+  return {
+    currentMonth: currentCount || 0,
+    previousMonth: prevCount || 0,
+  };
 }
 
-
-
 export async function getOngoingProjectsCount() {
-    const { count, error } = await supabase
-        .from('projects')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'Ongoing');
+  const { count, error } = await supabase
+    .from("projects")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "Ongoing");
 
-    if (error) throw error;
+  if (error) throw error;
 
-    return count || 0;
+  return count || 0;
 }
