@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Sector } from 'recharts';
 import { ArrowUpRight, DollarSign, Users, CreditCard, Activity } from 'lucide-react';
-import { getProjectStatuses, getProjectProfits, getMonthlyProfitSums, getCompletedProjectCounts, getOngoingProjectsCount } from './supabaseServices'; // make sure path is correct
+import { getProjectStatuses, getProjectProfits, getMonthlyProfitSums, getCompletedProjectCounts, getOngoingProjectsCount, getUpcomingProjectsCount } from './supabaseServices'; // make sure path is correct
 
 // --- Static Data for Bar and Line Charts ---
 const barChartData = [
@@ -229,6 +229,23 @@ const Dashboard = () => {
         fetchOngoingProjects();
     }, []);
 
+    const [upcomingProjectsCount, setUpcomingProjectsCount] = useState(0);
+
+    useEffect(() => {
+        const fetchUpcomingProjects = async () => {
+            try {
+                const count = await getUpcomingProjectsCount();
+                setUpcomingProjectsCount(count);
+            } catch (error) {
+                console.error('Failed to fetch upcoming projects:', error);
+                setUpcomingProjectsCount(0);
+            }
+        };
+
+        fetchUpcomingProjects();
+    }, []);
+
+
 
     return (
         <div className="min-h-screen bg-gray-50 w-full text-gray-900 p-4 sm:p-6 lg:p-8">
@@ -255,25 +272,12 @@ const Dashboard = () => {
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <h3 className="text-sm font-medium text-gray-500">Subscriptions</h3>
-                            <Users className="h-4 w-4 text-gray-500" />
+                            <h3 className="text-sm font-medium text-gray-500">Upcoming Projects</h3>
+                            <ArrowUpRight className="h-4 w-4 text-gray-500" /> {/* replaced Users with ArrowUpRight */}
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">+2350</div>
-                            <p className="text-xs text-gray-500">+180.1% from last month</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <h3 className="text-sm font-medium text-gray-500">Projects Completed</h3>
-                            <CreditCard className="h-4 w-4 text-gray-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{completedProjectsThisMonth}</div>
-                            <p className={`text-xs ${completedProjectsChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                {completedProjectsChange >= 0 ? '+' : ''}
-                                {completedProjectsChange.toFixed(1)}% from last month
-                            </p>
+                            <div className="text-2xl font-bold">{upcomingProjectsCount}</div>
+                            <p className="text-xs text-gray-500">Planned projects not started yet</p>
                         </CardContent>
                     </Card>
 
@@ -285,6 +289,17 @@ const Dashboard = () => {
                         <CardContent>
                             <div className="text-2xl font-bold">{ongoingProjectsCount}</div>
                             <p className="text-xs text-gray-500">Current projects in progress</p>
+                        </CardContent>
+                    </Card>
+
+                     <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <h3 className="text-sm font-medium text-gray-500">Projects Completed</h3>
+                            <CreditCard className="h-4 w-4 text-gray-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{completedProjectsThisMonth}</div>
+                            <p className="text-xs text-gray-500">Completed Proects</p>
                         </CardContent>
                     </Card>
 

@@ -430,3 +430,19 @@ export const registerAdmin = async (email, password) => {
   if (error) throw error;
   return data;
 };
+
+
+
+export async function getUpcomingProjectsCount() {
+  const { count, error } = await supabase
+    .from('projects')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'Upcoming');
+
+  if (error) {
+    console.error('Error fetching upcoming projects count:', error);
+    throw error;
+  }
+
+  return count;
+}
