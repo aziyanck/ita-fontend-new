@@ -1,11 +1,11 @@
 // src/supabaseServices.js
 
-import { supabase } from './supabaseClient';
+import { supabase } from "./supabaseClient";
 
 // 1) Insert an invoice
 export const insertInvoice = async (invoiceData) => {
   const { data, error } = await supabase
-    .from('invoices')
+    .from("invoices")
     .insert([invoiceData])
     .select()
     .single();
@@ -16,7 +16,7 @@ export const insertInvoice = async (invoiceData) => {
 // 2) Insert a component
 export const insertComponent = async (componentData) => {
   const { data, error } = await supabase
-    .from('components')
+    .from("components")
     .insert([componentData])
     .select()
     .single();
@@ -27,7 +27,7 @@ export const insertComponent = async (componentData) => {
 // 3) Insert a purchase item
 export const insertPurchaseItem = async (purchaseData) => {
   const { data, error } = await supabase
-    .from('purchase_items')
+    .from("purchase_items")
     .insert([purchaseData])
     .select()
     .single();
@@ -35,11 +35,22 @@ export const insertPurchaseItem = async (purchaseData) => {
   return data;
 };
 
+// 4) Insert a sell item
+export const insertSellItem = async (sellItemData) => {
+  const { data, error } = await supabase
+    .from("sell_items")
+    .insert([sellItemData])
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+};
+
 export const getComponentDetails = async (componentId = null) => {
-  let query = supabase.from('components').select('*');
+  let query = supabase.from("components").select("*");
 
   if (componentId) {
-    query = query.eq('id', componentId).single();
+    query = query.eq("id", componentId).single();
   }
 
   const { data, error } = await query;
@@ -47,25 +58,22 @@ export const getComponentDetails = async (componentId = null) => {
   return data;
 };
 
-
-// 4) Update component quantity
+// 5) Update component quantity
 export const updateComponentQty = async (compId, newQty) => {
   const { data, error } = await supabase
-    .from('components')
+    .from("components")
     .update({ qty: newQty })
-    .eq('id', compId)
+    .eq("id", compId)
     .select()
     .single();
   if (error) throw error;
   return data;
 };
 
-
-
 // Insert a new dealer
 export const insertDealer = async (dealerName) => {
   const { data, error } = await supabase
-    .from('dealers')
+    .from("dealers")
     .insert([{ name: dealerName }])
     .select()
     .single();
@@ -76,32 +84,37 @@ export const insertDealer = async (dealerName) => {
 // Get an existing dealer by name
 export const getDealerByName = async (dealerName) => {
   const { data, error } = await supabase
-    .from('dealers')
-    .select('*')
-    .eq('name', dealerName)
+    .from("dealers")
+    .select("*")
+    .eq("name", dealerName)
     .single();
-  if (error && error.code !== 'PGRST116') throw error; // PGRST116: no rows found
+  if (error && error.code !== "PGRST116") throw error; // PGRST116: no rows found
   return data; // Can be null if not found
 };
-
 
 // src/supabaseServices.js
 
 export const getAllComponents = async () => {
   const { data, error } = await supabase
-    .from('components')
-    .select(`
+    .from("components")
+    .select(
+      `
+    id,
+    name,
+    hsn,
+    qty,
+    brand,
+    dealer:dealer_id (
       id,
-      name,
-      hsn,
-      qty,
-      brand,
-      dealer:dealer_id (
-        id,
-        name
-      )
-    `)
-    .order('name', { ascending: true });
+      name
+    ),
+    category:category_id (
+      id,
+      name
+    )
+  `
+    )
+    .order("name", { ascending: true });
 
   if (error) throw error;
   return data;
@@ -109,58 +122,65 @@ export const getAllComponents = async () => {
 
 export const getPurchasesSummary = async () => {
   const { data, error } = await supabase
-    .from('invoices')
+    .from("invoices")
     .select(`
       invoice_no,
       date,
-      purchase_items:purchase_items (
-        qty,
-        price,
-        comp_id,
-        component:comp_id (
-          dealer:dealer_id (
-            name
-          )
-        )
-      )
+      total_amount,
+      dealer:dealer_id ( name )
     `)
-    .eq('invoice_type', 'purchase')
-    .order('date', { ascending: false });
+    .eq("invoice_type", "purchase")
+    .order("date", { ascending: false });
 
   if (error) throw error;
 
-  const summaries = data.map((invoice) => {
-    let totalAmount = 0;
-    let dealerName = 'N/A';
-
-    if (invoice.purchase_items && invoice.purchase_items.length > 0) {
-      totalAmount = invoice.purchase_items.reduce(
-        (sum, item) => sum + (item.qty * item.price),
-        0
-      );
-      const firstDealer = invoice.purchase_items[0].component?.dealer?.name;
-      dealerName = firstDealer || 'N/A';
-    }
-
-    return {
-      invoice_no: invoice.invoice_no,
-      date: invoice.date,
-      dealer: dealerName,
-      total: totalAmount ?? 0,
-    };
-  });
-
-  return summaries;
+  return data.map(inv => ({
+    invoice_no: inv.invoice_no,
+    date: inv.date,
+    dealer: inv.dealer?.name || 'N/A',
+    total_amount: inv.total_amount,
+  }));
 };
 
 
 //display inv details
-export const getInvoiceDetails = async (invoiceNo) => {
+export const getSalesInvoiceDetails = async (invoiceNo) => {
   const { data, error } = await supabase
-    .from('invoices')
+    .from("invoices")
     .select(`
       invoice_no,
       date,
+      total_amount,
+      customer,
+      url,
+      sell_items (
+        id,
+        qty,
+        price,
+        component:comp_id (
+          name,
+          hsn,
+          brand
+        )
+      )
+    `)
+    .eq("invoice_no", invoiceNo)
+    .eq("invoice_type", "sell")
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+
+export const getInvoiceDetails = async (invoiceNo) => {
+  const { data, error } = await supabase
+    .from("invoices")
+    .select(
+      `
+      invoice_no,
+      date,
+      total_amount,
       purchase_items (
         id,
         qty,
@@ -172,10 +192,90 @@ export const getInvoiceDetails = async (invoiceNo) => {
           dealer:dealer_id ( name ) 
         )
       )
-    `)
-    .eq('invoice_no', invoiceNo)
+    `
+    )
+    .eq("invoice_no", invoiceNo)
     .single();
 
   if (error) throw error;
   return data;
 };
+
+
+export const getLatestInvoiceNumber = async () => {
+  const { data, error } = await supabase
+    .from('invoices')
+    .select('invoice_no')
+    .eq('invoice_type', 'sell')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error && error.code !== 'PGRST116') { 
+    throw error;
+  }
+
+  return data ? data.invoice_no : null;
+};
+
+
+export async function getSellsSummary() {
+  const { data, error } = await supabase
+    .from('invoices')
+    .select(`
+      invoice_no,
+      total_amount,
+      date,
+      customer
+    `)
+    .eq('invoice_type', 'sell');
+
+  if (error) throw error;
+  return data;
+}
+
+
+// for projects
+export async function getAllProjects() {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*'); // Fetch all columns
+
+  if (error) {
+    console.error('Error fetching projects:', error);
+    throw error; // Optional: rethrow to handle elsewhere
+  }
+
+  return data; // This will be an array of objects
+}
+
+
+
+export async function getProjectStatuses() {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('status'); // Only get the status field
+
+  if (error) {
+    console.error('Error fetching project statuses:', error);
+    throw error;
+  }
+
+  return data; // Array of objects like [{ status: 'In Progress' }, ...]
+}
+
+
+
+
+export async function getProjectProfits() {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('project_date, profit');
+
+  if (error) {
+    console.error('Error fetching project profits:', error);
+    throw error;
+  }
+
+  return data; // array of objects [{project_date: '...', final_value: ...}, ...]
+}

@@ -1,27 +1,28 @@
 import React, { useState } from 'react';
-import {
-    LayoutDashboard,
-    Menu,
-    X,
-    Newspaper,
-    ShoppingCart,
-    FolderKanban,
-} from 'lucide-react';
 
-import Dashboard from './admin_components/Dashbord';
-import GenerateQuotation from './admin_components/GenerateQuotation';
-import Products from './admin_components/Products';
-import InvoiceGenerator from './admin_components/InvoiceManager';
-import Projects from './admin_components/projects';
+// Make sure to install lucide-react: npm install lucide-react
+import { LayoutDashboard, Users, ShoppingCart, Settings, Menu, X ,HouseWifi, Newspaper } from 'lucide-react';
 
-// --- Sidebar Component ---
+import Dashboard from './admin_components/Dashbord'
+import GenerateQuotation from './admin_components/GenerateQuotation'
+import Products from './admin_components/Products'
+import InvoiceGenerator from './admin_components/InvoiceManager'
+import Projects from './admin_components/Projects'
+
+
+
+
+
+
 const Sidebar = ({ activeComponent, setActiveComponent, isOpen, setIsOpen }) => {
     const navItems = [
         { name: 'Dashboard', icon: LayoutDashboard, component: 'Dashboard' },
         { name: 'Generate Quotation', icon: Newspaper, component: 'Generate Quotation' },
         { name: 'Products', icon: ShoppingCart, component: 'Products' },
-        { name: 'Generate Invoice', icon: Newspaper, component: 'Generate Invoice' },
-        { name: 'Projects', icon: FolderKanban, component: 'Projects' },
+
+        {name: 'Generate Invoice', icon: Newspaper, component: 'Generate Invoice'},
+        {name: 'Projects', icon: HouseWifi, component: 'Projects'}
+
     ];
 
     return (
@@ -100,23 +101,19 @@ export default function Admin() {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <div className="min-h-screen flex bg-gray-100 font-sans">
+        <div className="h-screen min-h-screen w-screen flex bg-gray-100 font-sans">
             <Sidebar
                 activeComponent={activeComponent}
                 setActiveComponent={setActiveComponent}
                 isOpen={isSidebarOpen}
                 setIsOpen={setSidebarOpen}
             />
-            {isSidebarOpen && (
-                <div
-                    onClick={() => setSidebarOpen(false)}
-                    className="fixed inset-0 bg-black opacity-50 z-20 md:hidden"
-                ></div>
-            )}
-            <div className="flex-1 flex flex-col">
+            {isSidebarOpen && <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black opacity-50 z-20 md:hidden"></div>}
+            <div className="flex-1 flex flex-col overflow-y-scroll h-auto">
                 <Navbar setIsOpen={setSidebarOpen} />
                 <MainContent activeComponent={activeComponent} />
             </div>
         </div>
     );
 }
+
