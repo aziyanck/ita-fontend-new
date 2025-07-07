@@ -80,13 +80,7 @@ export default function Projects() {
         setIsAddProjectVisible(true);
     };
 
-    const calculateProfit = (row) => {
-        const final = parseFloat(row.finalValue || 0);
-        const mat = parseFloat(row.matExpenses || 0);
-        const labour = parseFloat(row.labour || 0);
-        const ta = parseFloat(row.ta || 0);
-        return final - (mat + labour + ta);
-    };
+    
     
     // --- The JSX below this line remains the same ---
     return (
@@ -172,7 +166,8 @@ export default function Projects() {
                                 label="Labour + TA" 
                                 value={(parseFloat(project.labour || 0) + parseFloat(project.ta || 0))} 
                             />
-                            <InfoBox label="Profit" value={calculateProfit(project)} isProfit={true} />
+                            <InfoBox label="Profit" value={project.profit} isProfit={true} />
+
                         </div>
                     </div>
                 ))}
