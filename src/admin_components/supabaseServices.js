@@ -446,3 +446,10 @@ export async function getUpcomingProjectsCount() {
 
   return count;
 }
+export const getUser = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    return user;
+  }
+  return null;
+};

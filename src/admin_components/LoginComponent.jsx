@@ -129,27 +129,13 @@ const LoginComponent = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-between">
-            <button
-              type="button"
-              onClick={handleRegisterUser}
-              className="w-1/3 bg-gray-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-500/50 transform hover:-translate-y-1 transition-all duration-300"
-            >
-              Add User
-            </button>
+          <div className="flex justify-center">
             <button
               type="submit"
               onClick={handleLogin}
               className="w-1/3 bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 transform hover:-translate-y-1 transition-all duration-300"
             >
               Login
-            </button>
-            <button
-              type="button"
-              onClick={handleRegisterAdmin}
-              className="w-1/3 bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-500/50 transform hover:-translate-y-1 transition-all duration-300"
-            >
-              Add Admin
             </button>
           </div>
         </form>

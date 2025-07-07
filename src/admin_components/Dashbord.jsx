@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Sector } from 'recharts';
 import { ArrowUpRight, DollarSign, Users, CreditCard, Activity } from 'lucide-react';
-import { getProjectStatuses, getProjectProfits, getMonthlyProfitSums, getCompletedProjectCounts, getOngoingProjectsCount, getUpcomingProjectsCount } from './supabaseServices'; // make sure path is correct
+import { getProjectStatuses, getProjectProfits, getMonthlyProfitSums, getCompletedProjectCounts, getOngoingProjectsCount } from './supabaseServices'; // make sure path is correct
+import UserManagement from './UserManagement';
 
 // --- Static Data for Bar and Line Charts ---
 const barChartData = [
@@ -363,6 +364,7 @@ const Dashboard = () => {
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>
+                     <UserManagement />
                 </div>
             </div>
         </div>
