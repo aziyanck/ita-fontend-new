@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from './admin_components/supabaseClient';
 // Make sure to install lucide-react: npm install lucide-react
 import { LayoutDashboard, Users, ShoppingCart, Settings, Menu, X ,HouseWifi, Newspaper } from 'lucide-react';
 
@@ -93,6 +95,27 @@ const MainContent = ({ activeComponent }) => {
 export default function Admin() {
     const [activeComponent, setActiveComponent] = useState('Dashboard');
     const [isSidebarOpen, setSidebarOpen] = useState(false);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                navigate('/login');
+            }
+        };
+        checkSession();
+
+        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (!session) {
+                navigate('/login');
+            }
+        });
+
+        return () => {
+            authListener.subscription.unsubscribe();
+        };
+    }, [navigate]);
 
     return (
         <div className="h-screen min-h-screen w-screen flex bg-gray-100 font-sans">
