@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Sector } from 'recharts';
 import { ArrowUpRight, DollarSign, Users, CreditCard, Activity } from 'lucide-react';
-import { getProjectStatuses, getProjectProfits } from './supabaseServices'; // make sure path is correct
+import { getProjectStatuses, getProjectProfits, getMonthlyProfitSums, getCompletedProjectCounts, getOngoingProjectsCount } from './supabaseServices'; // make sure path is correct
 
 // --- Static Data for Bar and Line Charts ---
 const barChartData = [
@@ -91,6 +91,17 @@ const Dashboard = () => {
     const [pieChartData, setPieChartData] = useState([]);
     const [lineChartData, setLineChartData] = useState([]);
 
+    const [monthlyProfit, setMonthlyProfit] = useState(0);
+    const [profitChange, setProfitChange] = useState(0);
+
+    const [completedProjectsThisMonth, setCompletedProjectsThisMonth] = useState(0);
+    const [completedProjectsChange, setCompletedProjectsChange] = useState(0);
+
+    const [ongoingProjectsCount, setOngoingProjectsCount] = useState(0);
+
+
+
+
     const onPieEnter = (_, index) => {
         setActivePieIndex(index);
     };
@@ -158,6 +169,64 @@ const Dashboard = () => {
         fetchProfits();
     }, []);
 
+    useEffect(() => {
+        const fetchMonthlyProfits = async () => {
+            try {
+                const { currentMonth, previousMonth } = await getMonthlyProfitSums();
+                setMonthlyProfit(currentMonth);
+
+                if (previousMonth === 0) {
+                    setProfitChange(0); // avoid division by zero
+                } else {
+                    const change = ((currentMonth - previousMonth) / previousMonth) * 100;
+                    setProfitChange(change);
+                }
+            } catch (error) {
+                console.error('Failed to fetch monthly profits:', error);
+                setMonthlyProfit(0);
+                setProfitChange(0);
+            }
+        };
+
+        fetchMonthlyProfits();
+    }, []);
+
+    useEffect(() => {
+        const fetchCompletedProjects = async () => {
+            try {
+                const { currentMonth, previousMonth } = await getCompletedProjectCounts();
+                setCompletedProjectsThisMonth(currentMonth);
+
+                if (previousMonth === 0) {
+                    setCompletedProjectsChange(0);
+                } else {
+                    const change = ((currentMonth - previousMonth) / previousMonth) * 100;
+                    setCompletedProjectsChange(change);
+                }
+            } catch (error) {
+                console.error('Failed to fetch completed projects:', error);
+                setCompletedProjectsThisMonth(0);
+                setCompletedProjectsChange(0);
+            }
+        };
+
+        fetchCompletedProjects();
+    }, []);
+
+    useEffect(() => {
+        const fetchOngoingProjects = async () => {
+            try {
+                const ongoing = await getOngoingProjectsCount();
+                setOngoingProjectsCount(ongoing);
+            } catch (error) {
+                console.error('Failed to fetch ongoing projects:', error);
+                setOngoingProjectsCount(0);
+            }
+        };
+
+        fetchOngoingProjects();
+    }, []);
+
 
     return (
         <div className="min-h-screen bg-gray-50 w-full text-gray-900 p-4 sm:p-6 lg:p-8">
@@ -168,14 +237,20 @@ const Dashboard = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <h3 className="text-sm font-medium text-gray-500">Total profit</h3>
+                            <h3 className="text-sm font-medium text-gray-500">Total Profit (This Month)</h3>
                             <DollarSign className="h-4 w-4 text-gray-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">$45,231.89</div>
-                            <p className="text-xs text-gray-500">+20.1% from last month</p>
+                            <div className="text-2xl font-bold">
+                                ₹{monthlyProfit.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+                            </div>
+                            <p className={`text-xs ${profitChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                {profitChange >= 0 ? '+' : ''}
+                                {profitChange.toFixed(1)}% from last month
+                            </p>
                         </CardContent>
                     </Card>
+
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <h3 className="text-sm font-medium text-gray-500">Subscriptions</h3>
@@ -188,24 +263,29 @@ const Dashboard = () => {
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <h3 className="text-sm font-medium text-gray-500">Sales</h3>
+                            <h3 className="text-sm font-medium text-gray-500">Projects Completed</h3>
                             <CreditCard className="h-4 w-4 text-gray-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">+12,234</div>
-                            <p className="text-xs text-gray-500">+19% from last month</p>
+                            <div className="text-2xl font-bold">{completedProjectsThisMonth}</div>
+                            <p className={`text-xs ${completedProjectsChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                {completedProjectsChange >= 0 ? '+' : ''}
+                                {completedProjectsChange.toFixed(1)}% from last month
+                            </p>
                         </CardContent>
                     </Card>
+
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <h3 className="text-sm font-medium text-gray-500">Active Now</h3>
+                            <h3 className="text-sm font-medium text-gray-500">Ongoing Projects</h3>
                             <Activity className="h-4 w-4 text-gray-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">+573</div>
-                            <p className="text-xs text-gray-500">+201 since last hour</p>
+                            <div className="text-2xl font-bold">{ongoingProjectsCount}</div>
+                            <p className="text-xs text-gray-500">Current projects in progress</p>
                         </CardContent>
                     </Card>
+
                 </div>
 
                 {/* --- Charts --- */}
@@ -222,7 +302,7 @@ const Dashboard = () => {
                                 <LineChart data={lineChartData}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255, 255, 255, 0.1)" />
                                     <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                                    <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${(value / 1000).toFixed(1)}K`} />
+                                    <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${(value / 1000).toFixed(1)}K`} />
                                     <Tooltip contentStyle={{ backgroundColor: 'rgb(249, 250, 251)', borderColor: 'rgba(255, 255, 255, 0.2)', borderRadius: '0.5rem' }} />
                                     <Legend iconType="circle" />
                                     <Line type="monotone" dataKey="profit" stroke="#10b981" strokeWidth={2} activeDot={{ r: 8 }} />
@@ -231,33 +311,7 @@ const Dashboard = () => {
                         </CardContent>
                     </Card>
 
-                    {/* Bar Chart */}
-                    <Card className="lg:col-span-2">
-                        <CardHeader>
-                            <h2 className="text-xl font-semibold">Profit Overview</h2>
-                            <p className="text-sm text-gray-500">A look at profit vs. expenses over the past months.</p>
-                        </CardHeader>
-                        <CardContent className="h-[350px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={barChartData}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255, 255, 255, 0.1)" />
-                                    <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                                    <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value / 1000}K`} />
-                                    <Tooltip
-                                        contentStyle={{
-                                            backgroundColor: 'rgba(30, 41, 59, 0.9)',
-                                            borderColor: 'rgba(255, 255, 255, 0.2)',
-                                            borderRadius: '0.5rem'
-                                        }}
-                                        cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }}
-                                    />
-                                    <Legend iconType="circle" />
-                                    <Bar dataKey="profit" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                                    <Bar dataKey="expenses" fill="#ef4444" radius={[4, 4, 0, 0]} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
+
 
 
 
@@ -268,7 +322,7 @@ const Dashboard = () => {
                             <h2 className="text-xl font-semibold">Project Status Distribution</h2>
                             <p className="text-sm text-gray-500">Distribution of project statuses from your database.</p>
                         </CardHeader>
-                        <CardContent className="h-[300px]">
+                        <CardContent className="h-[400px]">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie

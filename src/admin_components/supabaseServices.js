@@ -123,31 +123,33 @@ export const getAllComponents = async () => {
 export const getPurchasesSummary = async () => {
   const { data, error } = await supabase
     .from("invoices")
-    .select(`
+    .select(
+      `
       invoice_no,
       date,
       total_amount,
       dealer:dealer_id ( name )
-    `)
+    `
+    )
     .eq("invoice_type", "purchase")
     .order("date", { ascending: false });
 
   if (error) throw error;
 
-  return data.map(inv => ({
+  return data.map((inv) => ({
     invoice_no: inv.invoice_no,
     date: inv.date,
-    dealer: inv.dealer?.name || 'N/A',
+    dealer: inv.dealer?.name || "N/A",
     total_amount: inv.total_amount,
   }));
 };
-
 
 //display inv details
 export const getSalesInvoiceDetails = async (invoiceNo) => {
   const { data, error } = await supabase
     .from("invoices")
-    .select(`
+    .select(
+      `
       invoice_no,
       date,
       total_amount,
@@ -163,7 +165,8 @@ export const getSalesInvoiceDetails = async (invoiceNo) => {
           brand
         )
       )
-    `)
+    `
+    )
     .eq("invoice_no", invoiceNo)
     .eq("invoice_type", "sell")
     .single();
@@ -171,7 +174,6 @@ export const getSalesInvoiceDetails = async (invoiceNo) => {
   if (error) throw error;
   return data;
 };
-
 
 export const getInvoiceDetails = async (invoiceNo) => {
   const { data, error } = await supabase
@@ -201,81 +203,182 @@ export const getInvoiceDetails = async (invoiceNo) => {
   return data;
 };
 
-
 export const getLatestInvoiceNumber = async () => {
   const { data, error } = await supabase
-    .from('invoices')
-    .select('invoice_no')
-    .eq('invoice_type', 'sell')
-    .order('created_at', { ascending: false })
+    .from("invoices")
+    .select("invoice_no")
+    .eq("invoice_type", "sell")
+    .order("created_at", { ascending: false })
     .limit(1)
     .single();
 
-  if (error && error.code !== 'PGRST116') { 
+  if (error && error.code !== "PGRST116") {
     throw error;
   }
 
   return data ? data.invoice_no : null;
 };
 
-
 export async function getSellsSummary() {
   const { data, error } = await supabase
-    .from('invoices')
-    .select(`
+    .from("invoices")
+    .select(
+      `
       invoice_no,
       total_amount,
       date,
       customer
-    `)
-    .eq('invoice_type', 'sell');
+    `
+    )
+    .eq("invoice_type", "sell");
 
   if (error) throw error;
   return data;
 }
 
-
 // for projects
 export async function getAllProjects() {
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*'); // Fetch all columns
+  const { data, error } = await supabase.from("projects").select("*"); // Fetch all columns
 
   if (error) {
-    console.error('Error fetching projects:', error);
+    console.error("Error fetching projects:", error);
     throw error; // Optional: rethrow to handle elsewhere
   }
 
   return data; // This will be an array of objects
 }
 
-
-
 export async function getProjectStatuses() {
-  const { data, error } = await supabase
-    .from('projects')
-    .select('status'); // Only get the status field
+  const { data, error } = await supabase.from("projects").select("status"); // Only get the status field
 
   if (error) {
-    console.error('Error fetching project statuses:', error);
+    console.error("Error fetching project statuses:", error);
     throw error;
   }
 
   return data; // Array of objects like [{ status: 'In Progress' }, ...]
 }
 
-
-
-
 export async function getProjectProfits() {
   const { data, error } = await supabase
-    .from('projects')
-    .select('project_date, profit');
+    .from("projects")
+    .select("project_date, profit");
 
   if (error) {
-    console.error('Error fetching project profits:', error);
+    console.error("Error fetching project profits:", error);
     throw error;
   }
 
   return data; // array of objects [{project_date: '...', final_value: ...}, ...]
+}
+
+export async function getMonthlyProfitSums() {
+  const now = new Date();
+
+  // Calculate start of current month
+  const currentMonthStart = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    1
+  ).toISOString();
+  const nextMonthStart = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    1
+  ).toISOString();
+
+  // Calculate start of previous month
+  const prevMonthStart = new Date(
+    now.getFullYear(),
+    now.getMonth() - 1,
+    1
+  ).toISOString();
+  const currentMonthStartForPrev = currentMonthStart; // reuse as previous month end
+
+  // --- Query current month profit sum (Completed only) ---
+  let { data: currentData, error: currentError } = await supabase
+    .from("projects")
+    .select("profit")
+    .eq("status", "Completed") // ✅ Only completed projects
+    .gte("project_date", currentMonthStart)
+    .lt("project_date", nextMonthStart);
+
+  if (currentError) throw currentError;
+
+  const currentMonthProfit = currentData.reduce(
+    (sum, proj) => sum + (proj.profit || 0),
+    0
+  );
+
+  // --- Query previous month profit sum (Completed only) ---
+  let { data: prevData, error: prevError } = await supabase
+    .from("projects")
+    .select("profit")
+    .eq("status", "Completed") // ✅ Only completed projects
+    .gte("project_date", prevMonthStart)
+    .lt("project_date", currentMonthStartForPrev);
+
+  if (prevError) throw prevError;
+
+  const previousMonthProfit = prevData.reduce(
+    (sum, proj) => sum + (proj.profit || 0),
+    0
+  );
+
+  return {
+    currentMonth: currentMonthProfit,
+    previousMonth: previousMonthProfit,
+  };
+}
+
+
+
+export async function getCompletedProjectCounts() {
+    const now = new Date();
+
+    // Start and end for current month
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
+
+    // Start and end for previous month
+    const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+    const currentMonthStartForPrev = currentMonthStart;
+
+    // --- Query current month completed projects count ---
+    const { count: currentCount, error: currentError } = await supabase
+        .from('projects')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'Completed')
+        .gte('project_date', currentMonthStart)
+        .lt('project_date', nextMonthStart);
+
+    if (currentError) throw currentError;
+
+    // --- Query previous month completed projects count ---
+    const { count: prevCount, error: prevError } = await supabase
+        .from('projects')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'Completed')
+        .gte('project_date', prevMonthStart)
+        .lt('project_date', currentMonthStartForPrev);
+
+    if (prevError) throw prevError;
+
+    return {
+        currentMonth: currentCount || 0,
+        previousMonth: prevCount || 0,
+    };
+}
+
+
+
+export async function getOngoingProjectsCount() {
+    const { count, error } = await supabase
+        .from('projects')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'Ongoing');
+
+    if (error) throw error;
+
+    return count || 0;
 }
