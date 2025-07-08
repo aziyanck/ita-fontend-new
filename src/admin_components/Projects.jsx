@@ -11,37 +11,39 @@ export default function Projects() {
   const [allProjects, setAllProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadProjects() {
-      try {
-        setLoading(true);
-        const projects = await projectService.getProjects();
-        setAllProjects(projects);
-      } catch (error) {
-        console.error("Failed to load projects. Supabase error:", error.message);
-        console.error("Full error object:", error);
-      } finally {
-        setLoading(false);
-      }
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      const projects = await projectService.getProjects();
+      setAllProjects(projects);
+    } catch (error) {
+      console.error("Failed to fetch projects after save. Supabase error:", error.message);
+    } finally {
+      setLoading(false);
     }
-    loadProjects();
+  };
+
+
+  useEffect(() => {
+    fetchProjects();
   }, []);
+
 
   const handleSave = async (data) => {
     try {
       if (modalMode === 'add') {
-        const newProjects = await projectService.addProjects(data.projects, data.status);
-        setAllProjects(prev => [...prev, ...newProjects]);
+        await projectService.addProjects(data.projects, data.status);
         setActiveFilter(data.status);
       } else {
         const updatedProject = await projectService.updateProject(data);
-        setAllProjects(prev =>
-          prev.map(p => (p.id === updatedProject.id ? updatedProject : p))
-        );
         if (updatedProject.status === 'Completed') {
           setActiveFilter('Completed');
         }
       }
+
+      // Re-fetch the entire project list from DB
+      await fetchProjects();
+
     } catch (error) {
       console.error("Failed to save project. Supabase error:", error.message);
       console.error("Full error object:", error);
@@ -103,11 +105,10 @@ export default function Projects() {
           <button
             key={status}
             onClick={() => setActiveFilter(status)}
-            className={`py-2 px-6 text-lg ${
-              activeFilter === status
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-500'
-            }`}
+            className={`py-2 px-6 text-lg ${activeFilter === status
+              ? 'border-b-2 border-blue-600 text-blue-600'
+              : 'text-gray-500'
+              }`}
           >
             {status}
           </button>
@@ -187,15 +188,13 @@ const InfoBox = ({ label, value, isProfit = false }) => {
   const formattedValue = `₹ ${parseFloat(value || 0).toLocaleString('en-IN')}`;
   return (
     <div
-      className={`p-4 rounded-lg ${
-        isProfit ? 'bg-green-50' : 'bg-gray-100'
-      }`}
+      className={`p-4 rounded-lg ${isProfit ? 'bg-green-50' : 'bg-gray-100'
+        }`}
     >
       <p className="text-sm text-gray-500">{label}</p>
       <p
-        className={`text-xl font-semibold ${
-          isProfit ? 'text-green-600' : 'text-gray-800'
-        }`}
+        className={`text-xl font-semibold ${isProfit ? 'text-green-600' : 'text-gray-800'
+          }`}
       >
         {formattedValue}
       </p>
