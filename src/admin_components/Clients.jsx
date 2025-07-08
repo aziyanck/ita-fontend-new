@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { getAllClientsWithProjects } from './supabaseServices';
+import SalesInvoiceDetail from './sub_admins/SalesInvoiceDetail';
 
 const Clients = () => {
   const [clients, setClients] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
   const [search, setSearch] = useState('');
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -31,13 +33,13 @@ const Clients = () => {
   }, [search, clients]);
 
   const closeDetails = () => setSelectedClient(null);
+  const closeInvoice = () => setSelectedInvoice(null);
 
   const getClientTotalProfit = (projects = []) =>
     projects.reduce((sum, p) => sum + (p.profit || 0), 0);
 
   return (
     <div className="p-6 w-full max-w-screen text-gray-950">
-      {/* Header section with responsive layout */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
         <h2 className="text-2xl font-bold">All Clients</h2>
         <input
@@ -49,7 +51,6 @@ const Clients = () => {
         />
       </div>
 
-      {/* Clients grid */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
         {filteredClients.map(client => (
           <div
@@ -67,7 +68,6 @@ const Clients = () => {
         ))}
       </div>
 
-      {/* Modal for client project details */}
       {selectedClient && (
         <div className="fixed inset-0 bg-black/30 z-50 flex justify-center items-center backdrop-blur-sm">
           <div className="bg-white w-full max-w-3xl p-6 rounded-xl shadow-xl overflow-y-auto max-h-[90vh] relative">
@@ -82,6 +82,7 @@ const Clients = () => {
               <thead className="bg-gray-100">
                 <tr>
                   <th className="px-3 py-2">#</th>
+                  <th className="px-3 py-2">Invoice No</th>
                   <th className="px-3 py-2">Project Name</th>
                   <th className="px-3 py-2">Date</th>
                   <th className="px-3 py-2">Status</th>
@@ -91,8 +92,9 @@ const Clients = () => {
               </thead>
               <tbody>
                 {selectedClient.projects?.map((proj, index) => (
-                  <tr key={proj.id} className="border-t">
+                  <tr key={proj.id} className="border-t hover:bg-gray-50 cursor-pointer" onClick={() => proj.invoice_no && setSelectedInvoice(proj.invoice_no)}>
                     <td className="px-3 py-1">{index + 1}</td>
+                    <td className="px-3 py-1 text-blue-600 underline">{proj.invoice_no || '—'}</td>
                     <td className="px-3 py-1">{proj.project_name}</td>
                     <td className="px-3 py-1">{new Date(proj.project_date).toLocaleDateString()}</td>
                     <td className="px-3 py-1">{proj.status}</td>
@@ -104,6 +106,10 @@ const Clients = () => {
             </table>
           </div>
         </div>
+      )}
+
+      {selectedInvoice && (
+        <SalesInvoiceDetail invoiceNo={selectedInvoice} onClose={closeInvoice} />
       )}
     </div>
   );

@@ -578,7 +578,8 @@ export async function getMonthlyProfitsByFY(fyStartYear) {
 
 
 
-export async function getAllClientsWithProjects() {
+// supabaseServices.js
+export const getAllClientsWithProjects = async () => {
   const { data, error } = await supabase
     .from('clients')
     .select(`
@@ -589,12 +590,13 @@ export async function getAllClientsWithProjects() {
         id,
         project_name,
         project_date,
-        profit,
         status,
-        location
+        location,
+        profit,
+        invoice_no
       )
     `);
 
   if (error) throw error;
   return data;
-}
+};
