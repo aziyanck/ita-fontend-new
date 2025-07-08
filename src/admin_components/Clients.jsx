@@ -36,23 +36,25 @@ const Clients = () => {
     projects.reduce((sum, p) => sum + (p.profit || 0), 0);
 
   return (
-    <div className="p-6 max-w-screen text-gray-950">
-      <div className="flex items-center justify-between mb-4">
+    <div className="p-6 w-full max-w-screen text-gray-950">
+      {/* Header section with responsive layout */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
         <h2 className="text-2xl font-bold">All Clients</h2>
         <input
           type="text"
           placeholder="Search by name..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="border  py-1 rounded text-sm"
+          className="border px-3 py-1 rounded text-sm w-full sm:w-auto"
         />
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-6 gap-4">
+      {/* Clients grid */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
         {filteredClients.map(client => (
           <div
             key={client.id}
-            className="px-4 py-4 bg-white rounded-xl shadow hover:bg-gray-50 cursor-pointer"
+            className="p-4 bg-white rounded-xl shadow hover:bg-gray-50 cursor-pointer"
             onClick={() => setSelectedClient(client)}
           >
             <h3 className="text-lg font-semibold">{client.name}</h3>
@@ -65,6 +67,7 @@ const Clients = () => {
         ))}
       </div>
 
+      {/* Modal for client project details */}
       {selectedClient && (
         <div className="fixed inset-0 bg-black/30 z-50 flex justify-center items-center backdrop-blur-sm">
           <div className="bg-white w-full max-w-3xl p-6 rounded-xl shadow-xl overflow-y-auto max-h-[90vh] relative">
