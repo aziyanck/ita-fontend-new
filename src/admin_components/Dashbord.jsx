@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Sector } from 'recharts';
 import { ArrowUpRight, DollarSign, Users, CreditCard, Activity } from 'lucide-react';
-import { getProjectStatuses, getProjectProfits, getMonthlyProfitSums, getCompletedProjectCounts, getOngoingProjectsCount } from './supabaseServices'; // make sure path is correct
+import { getProjectStatuses, getProjectProfits, getMonthlyProfitSums, getCompletedProjectCounts, getOngoingProjectsCount, getUpcomingProjectsCount } from './supabaseServices'; // make sure path is correct
+import { supabase } from './supabaseClient'; // Adjust the path as needed
+
+import UserManagement from './UserManagement';
+import DataView from './DataView';
+
 
 // --- Static Data for Bar and Line Charts ---
 const barChartData = [
@@ -13,6 +18,9 @@ const barChartData = [
     { name: 'Jun', profit: 2390, expenses: 3800 },
     { name: 'Jul', profit: 3490, expenses: 4300 },
 ];
+
+
+
 
 
 
@@ -99,6 +107,10 @@ const Dashboard = () => {
 
     const [ongoingProjectsCount, setOngoingProjectsCount] = useState(0);
 
+    const [showDataView, setShowDataView] = useState(false);
+    const [dataViewTitle, setDataViewTitle] = useState('');
+    const [dataViewData, setDataViewData] = useState([]);
+
 
 
 
@@ -140,19 +152,20 @@ const Dashboard = () => {
             try {
                 const data = await getProjectProfits();
                 if (data && data.length > 0) {
-                    // Group profits by month
-                    const profitsByMonth = data.reduce((acc, curr) => {
-                        const date = new Date(curr.project_date);
-                        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; // e.g., 2025-07
-                        acc[monthKey] = (acc[monthKey] || 0) + (curr.profit || 0);
-                        return acc;
-                    }, {});
+                    const profitsByMonth = data
+                        .filter((curr) => curr.status === 'Completed')
+                        .reduce((acc, curr) => {
+                            const date = new Date(curr.project_date);
+                            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                            acc[monthKey] = (acc[monthKey] || 0) + (curr.profit || 0);
+                            return acc;
+                        }, {});
 
-                    // Sort months chronologically
+
                     const sortedMonths = Object.keys(profitsByMonth).sort();
 
                     const lineData = sortedMonths.map((month) => ({
-                        name: month,        // e.g., "2025-07"
+                        name: month,
                         profit: profitsByMonth[month],
                     }));
 
@@ -168,6 +181,7 @@ const Dashboard = () => {
 
         fetchProfits();
     }, []);
+
 
     useEffect(() => {
         const fetchMonthlyProfits = async () => {
@@ -227,6 +241,50 @@ const Dashboard = () => {
         fetchOngoingProjects();
     }, []);
 
+    const [upcomingProjectsCount, setUpcomingProjectsCount] = useState(0);
+
+    useEffect(() => {
+        const fetchUpcomingProjects = async () => {
+            try {
+                const count = await getUpcomingProjectsCount();
+                setUpcomingProjectsCount(count);
+            } catch (error) {
+                console.error('Failed to fetch upcoming projects:', error);
+                setUpcomingProjectsCount(0);
+            }
+        };
+
+        fetchUpcomingProjects();
+    }, []);
+
+
+    const handleCardClick = async (status, title) => {
+        console.log(`Fetching projects with status: ${status}`);
+        try {
+            const { data, error } = await supabase
+                .from('projects')
+                .select('*')
+                .eq('status', status);
+
+            if (error) {
+                console.error(`Error fetching ${status} projects:`, error);
+                alert(`Error loading ${status} projects: ${error.message || error}`);
+                setDataViewData([]);
+                return;
+            }
+
+            console.log(`Fetched ${data.length} projects for status ${status}`);
+            setDataViewTitle(title);
+            setDataViewData(data);
+            setShowDataView(true);
+        } catch (error) {
+            console.error('Unexpected error loading DataView:', error);
+            alert('Unexpected error loading data');
+        }
+    };
+
+
+
 
     return (
         <div className="min-h-screen bg-gray-50 w-full text-gray-900 p-4 sm:p-6 lg:p-8">
@@ -251,40 +309,45 @@ const Dashboard = () => {
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <h3 className="text-sm font-medium text-gray-500">Subscriptions</h3>
-                            <Users className="h-4 w-4 text-gray-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">+2350</div>
-                            <p className="text-xs text-gray-500">+180.1% from last month</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <h3 className="text-sm font-medium text-gray-500">Projects Completed</h3>
-                            <CreditCard className="h-4 w-4 text-gray-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{completedProjectsThisMonth}</div>
-                            <p className={`text-xs ${completedProjectsChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                {completedProjectsChange >= 0 ? '+' : ''}
-                                {completedProjectsChange.toFixed(1)}% from last month
-                            </p>
-                        </CardContent>
-                    </Card>
+                    <div onClick={() => handleCardClick('Upcoming', 'Upcoming Projects')}>
+                        <Card className="cursor-pointer">
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <h3 className="text-sm font-medium text-gray-500">Upcoming Projects</h3>
+                                <ArrowUpRight className="h-4 w-4 text-gray-500" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{upcomingProjectsCount}</div>
+                                <p className="text-xs text-gray-500">Planned projects not started yet</p>
+                            </CardContent>
+                        </Card>
+                    </div>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <h3 className="text-sm font-medium text-gray-500">Ongoing Projects</h3>
-                            <Activity className="h-4 w-4 text-gray-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{ongoingProjectsCount}</div>
-                            <p className="text-xs text-gray-500">Current projects in progress</p>
-                        </CardContent>
-                    </Card>
+                    <div onClick={() => handleCardClick('Ongoing', 'Ongoing Projects')}>
+                        <Card className="cursor-pointer">
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <h3 className="text-sm font-medium text-gray-500">Ongoing Projects</h3>
+                                <Activity className="h-4 w-4 text-gray-500" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{ongoingProjectsCount}</div>
+                                <p className="text-xs text-gray-500">Current projects in progress</p>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    <div onClick={() => handleCardClick('Completed', 'Completed Projects')}>
+                        <Card className="cursor-pointer">
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <h3 className="text-sm font-medium text-gray-500">Projects Completed</h3>
+                                <CreditCard className="h-4 w-4 text-gray-500" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{completedProjectsThisMonth}</div>
+                                <p className="text-xs text-gray-500">Completed projects</p>
+                            </CardContent>
+                        </Card>
+                    </div>
+
 
                 </div>
 
@@ -346,8 +409,20 @@ const Dashboard = () => {
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>
+
+
+                    <UserManagement />
+                    {showDataView && (
+                        <DataView
+                            title={dataViewTitle}
+                            data={dataViewData}
+                            onClose={() => setShowDataView(false)}
+                        />
+                    )}
                 </div>
             </div>
+
+
         </div>
     );
 };

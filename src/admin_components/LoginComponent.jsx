@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
+import { loginUser, registerUser, registerAdmin } from './supabaseServices';
 
 // Main App Component
 
 // Login Component
 const LoginComponent = () => {
-
   const navigate = useNavigate();
 
   // State to manage password visibility
@@ -23,26 +22,44 @@ const LoginComponent = () => {
   };
 
   // Handle form submission
- const handleLogin = (e) => {
-  e.preventDefault(); // prevent page refresh
+  const handleLogin = async (e) => {
+    e.preventDefault(); // prevent page refresh
+    try {
+      await loginUser(email, password);
+      setSuccess('Login successful!');
+      setError('');
+      setTimeout(() => {
+        navigate('/admin'); // 👈 redirect to /admin after login
+      }, 500);
+    } catch (error) {
+      setError(error.message);
+      setSuccess('');
+    }
+  };
 
-  // Simulate validation or API login logic
-  if (email === 'admin@example.com' && password === '123456') {
-    // optional: set success message
-    setSuccess('Login successful!');
-    setError('');
+  const handleRegisterUser = async (e) => {
+    e.preventDefault(); // prevent page refresh
+    try {
+      await registerUser(email, password);
+      setSuccess('User registered successfully!');
+      setError('');
+    } catch (error) {
+      setError(error.message);
+      setSuccess('');
+    }
+  };
 
-    // Delay navigation just for UX (optional)
-    setTimeout(() => {
-      navigate('/admin'); // 👈 redirect to /admin after login
-    }, 500);
-  } else {
-    setError('Invalid credentials');
-    setSuccess('');
-  }
-};
-
-
+  const handleRegisterAdmin = async (e) => {
+    e.preventDefault(); // prevent page refresh
+    try {
+      await registerAdmin(email, password);
+      setSuccess('Admin registered successfully!');
+      setError('');
+    } catch (error) {
+      setError(error.message);
+      setSuccess('');
+    }
+  };
 
   return (
     <div className="flex justify-center items-center h-screen ">
@@ -53,7 +70,7 @@ const LoginComponent = () => {
         </div>
 
         {/* Login Form */}
-        <form className="space-y-6" onSubmit={handleLogin} >
+        <form className="space-y-6">
           {/* Email Input */}
           <div className="relative">
             <div className="absolute top-1/2 -translate-y-1/2 left-3 text-gray-400">
@@ -92,30 +109,39 @@ const LoginComponent = () => {
           </div>
 
           {/* Error and Success Messages */}
-          {error && <div className="text-red-400 text-sm text-center">{error}</div>}
-          {success && <div className="text-green-400 text-sm text-center">{success}</div>}
-
+          {error && (
+            <div className="text-red-400 text-sm text-center">{error}</div>
+          )}
+          {success && (
+            <div className="text-green-400 text-sm text-center">
+              {success}
+            </div>
+          )}
 
           {/* Forgot Password Link */}
           <div className="text-right">
-            <a href="#" className="text-sm text-indigo-400 hover:text-indigo-300 hover:underline">
+            <a
+              href="#"
+              className="text-sm text-indigo-400 hover:text-indigo-300 hover:underline"
+            >
               Forgot Password?
             </a>
           </div>
 
-          {/* Login Button */}
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 transform hover:-translate-y-1 transition-all duration-300"
-
-          >
-            Login
-          </button>
+          {/* Action Buttons */}
+          <div className="flex justify-center">
+            <button
+              type="submit"
+              onClick={handleLogin}
+              className="w-1/3 bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 transform hover:-translate-y-1 transition-all duration-300"
+            >
+              Login
+            </button>
+          </div>
         </form>
       </div>
     </div>
   );
 };
-
 
 export default LoginComponent;
