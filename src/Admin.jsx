@@ -68,7 +68,7 @@ const Sidebar = ({
 
   return (
     <aside
-      className={`bg-gray-800 text-white h-auto fixed inset-y-0 left-0 transform ${isOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out w-64 z-30 pt-20`}
+      className={`bg-gray-800 text-white h-auto fixed inset-y-0 left-0 transform ${isOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out w-64 z-30 pt-20 md:pt-0`}
     >
 
      
@@ -107,19 +107,59 @@ const Sidebar = ({
   )
 }
 
-const Navbar = ({ setIsOpen }) => (
-  <header className="bg-white shadow-md px-6 py-4 fixed top-0 left-0 w-full md:left-64 md:w-[calc(100%-16rem)] flex justify-between items-center z-50">
-    <button onClick={() => setIsOpen(true)} className="md:hidden text-gray-600">
-      <Menu size={24} />
-    </button>
-    <div className="text-xl font-semibold text-gray-800 hidden md:block">
-      Dashboard
-    </div>
-    <div className="flex items-center">
-      <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
-    </div>
-  </header>
-);
+const Navbar = ({ setIsOpen }) => {
+  const [showLogoutBox, setShowLogoutBox] = useState(false);
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const user = await getUser();
+      setUserName(user?.user_metadata?.name || "User");
+    };
+    fetchUserName();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/login"; // or navigate("/login");
+  };
+
+  return (
+    <header className="bg-white shadow-md px-6 py-4 fixed top-0 left-0 w-full md:left-64 md:w-[calc(100%-16rem)] flex justify-between items-center z-50">
+      <button onClick={() => setIsOpen(true)} className="md:hidden text-gray-600">
+        <Menu size={24} />
+      </button>
+
+      <div className="text-xl font-semibold text-gray-800 hidden md:block">
+        Dashboard
+      </div>
+
+      {/* Profile + Popup */}
+      <div className="relative">
+        <div
+          className="w-10 h-10 bg-gray-300 rounded-full cursor-pointer"
+          onClick={() => setShowLogoutBox(!showLogoutBox)}
+        ></div>
+
+        {showLogoutBox && (
+          <div className="absolute right-0 mt-2 bg-white shadow-md rounded border px-4 py-2 z-50 w-40 ">
+            <div className="text-sm font-medium text-gray-700 mb-2">
+              {userName}
+            </div>
+            <button
+              onClick={handleLogout}
+              className="text-sm text-red-600 hover:underline hover:cursor-pointer"
+            >
+              Logout
+            </button>
+          </div>
+        )}
+      </div>
+    </header>
+  );
+};
+
+
 
 
 
