@@ -10,17 +10,9 @@ import Products from "./admin_components/Products"
 import InvoiceGenerator from "./admin_components/InvoiceManager"
 import Projects from "./admin_components/Projects"
 import UserManagement from "./admin_components/UserManagement"
-import {
-  LayoutDashboard,
-  Users,
-  ShoppingCart,
-  Settings,
-  Menu,
-  X,
-  HouseWifi,
-  Newspaper,
-} from "lucide-react"
-import Clients from "./admin_components/Clients"
+import { LayoutDashboard, Users, ShoppingCart, UserCog, Menu, X, HouseWifi, Newspaper } from 'lucide-react';
+import Clients from './admin_components/Clients'
+
 
 const Sidebar = ({
   activeComponent,
@@ -60,13 +52,14 @@ const Sidebar = ({
       component: "Projects",
       adminOnly: true,
     },
+    { name: 'Clients', icon: Users, component: 'Clients', adminOnly: true },
     {
       name: "User Management",
-      icon: Users,
+      icon: UserCog,
       component: "User Management",
       adminOnly: true,
     },
-    { name: "Clients", icon: Users, component: "Clients", adminOnly: true },
+
   ]
 
   const filteredNavItems = navItems.filter(
@@ -75,8 +68,11 @@ const Sidebar = ({
 
   return (
     <aside
-      className={`bg-gray-800 text-white h-auto fixed inset-y-0 left-0 transform ${isOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out w-64 z-30`}
+      className={`bg-gray-800 text-white h-auto fixed inset-y-0 left-0 transform ${isOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out w-64 z-30 pt-20 md:pt-0`}
     >
+
+     
+
       <div className="p-4 flex justify-between items-center">
         <h2 className="text-2xl font-bold">Admin Panel</h2>
         <button
@@ -95,11 +91,10 @@ const Sidebar = ({
                   setActiveComponent(item.component)
                   if (isOpen) setIsOpen(false) // Close sidebar on mobile after click
                 }}
-                className={`w-full flex items-center p-3 my-2 rounded-lg transition-colors duration-200 ${
-                  activeComponent === item.component
-                    ? "bg-blue-600 text-white"
-                    : "hover:bg-gray-700"
-                }`}
+                className={`w-full flex items-center p-3 my-2 rounded-lg transition-colors duration-200 ${activeComponent === item.component
+                  ? "bg-blue-600 text-white"
+                  : "hover:bg-gray-700"
+                  }`}
               >
                 <item.icon className="mr-3" size={20} />
                 {item.name}
@@ -112,19 +107,61 @@ const Sidebar = ({
   )
 }
 
-const Navbar = ({ setIsOpen }) => (
-  <header className="bg-white shadow-md p-4 w-screen md:w-auto flex justify-between items-center z-20">
-    <button onClick={() => setIsOpen(true)} className="md:hidden text-gray-600">
-      <Menu size={24} />
-    </button>
-    <div className="text-xl font-semibold text-gray-800 hidden md:block">
-      Dashboard
-    </div>
-    <div className="flex items-center">
-      <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
-    </div>
-  </header>
-)
+const Navbar = ({ setIsOpen }) => {
+  const [showLogoutBox, setShowLogoutBox] = useState(false);
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const user = await getUser();
+      setUserName(user?.user_metadata?.name || "User");
+    };
+    fetchUserName();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/login"; // or navigate("/login");
+  };
+
+  return (
+    <header className="bg-white shadow-md px-6 py-4 fixed top-0 left-0 w-full md:left-64 md:w-[calc(100%-16rem)] flex justify-between items-center z-50">
+      <button onClick={() => setIsOpen(true)} className="md:hidden text-gray-600">
+        <Menu size={24} />
+      </button>
+
+      <div className="text-xl font-semibold text-gray-800 hidden md:block">
+        Dashboard
+      </div>
+
+      {/* Profile + Popup */}
+      <div className="relative">
+        <div
+          className="w-10 h-10 bg-gray-300 rounded-full cursor-pointer"
+          onClick={() => setShowLogoutBox(!showLogoutBox)}
+        ></div>
+
+        {showLogoutBox && (
+          <div className="absolute right-0 mt-2 bg-white shadow-md rounded border px-4 py-2 z-50 w-40 ">
+            <div className="text-sm font-medium text-gray-700 mb-2">
+              {userName}
+            </div>
+            <button
+              onClick={handleLogout}
+              className="text-sm text-red-600 hover:underline hover:cursor-pointer"
+            >
+              Logout
+            </button>
+          </div>
+        )}
+      </div>
+    </header>
+  );
+};
+
+
+
+
 
 const MainContent = ({ activeComponent }) => {
   const renderComponent = () => {
@@ -153,18 +190,17 @@ const MainContent = ({ activeComponent }) => {
 // --- The Main App Component ---
 
 export default function Admin() {
-  const [activeComponent, setActiveComponent] = useState(
-    () => localStorage.getItem("activeComponent") || null,
-  )
+  const [activeComponent, setActiveComponent] = useState(() => localStorage.getItem('activeComponent') || null);
 
-  const [isSidebarOpen, setSidebarOpen] = useState(false)
-  const [userRole, setUserRole] = useState(null)
-  const navigate = useNavigate()
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+  const navigate = useNavigate();
   useEffect(() => {
     if (activeComponent) {
-      localStorage.setItem("activeComponent", activeComponent)
+      localStorage.setItem('activeComponent', activeComponent);
     }
-  }, [activeComponent])
+  }, [activeComponent]);
+
 
   useEffect(() => {
     const handleUserSession = async (session) => {
@@ -204,9 +240,9 @@ export default function Admin() {
 
     // Cleanup the listener when the component is unmounted
     return () => {
-      authListener.subscription.unsubscribe()
-    }
-  }, [navigate, activeComponent])
+      authListener.subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   return (
     <div className="h-screen min-h-screen w-screen flex bg-gray-100 font-sans">
@@ -223,10 +259,13 @@ export default function Admin() {
           className="fixed inset-0 bg-black opacity-50 z-20 md:hidden"
         ></div>
       )}
-      <div className="flex-1 flex flex-col overflow-y-scroll h-auto">
+     
+      <div className="flex-1 flex flex-col overflow-y-scroll h-auto pt-[4.5rem] pl-0">
         <Navbar setIsOpen={setSidebarOpen} />
         {activeComponent && <MainContent activeComponent={activeComponent} />}
       </div>
+
+
     </div>
   )
 }
