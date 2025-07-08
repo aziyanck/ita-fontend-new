@@ -6,6 +6,7 @@ import { supabase } from './supabaseClient'; // Adjust the path as needed
 
 import UserManagement from './UserManagement';
 import DataView from './DataView';
+import ProfitPopup from './ProfitPopup';
 
 
 // --- Static Data for Bar and Line Charts ---
@@ -106,6 +107,10 @@ const Dashboard = () => {
     const [showDataView, setShowDataView] = useState(false);
     const [dataViewTitle, setDataViewTitle] = useState('');
     const [dataViewData, setDataViewData] = useState([]);
+
+
+    const [showProfitPopup, setShowProfitPopup] = useState(false);
+
 
 
 
@@ -291,21 +296,24 @@ const Dashboard = () => {
 
                 {/* --- Stats Cards --- */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <h3 className="text-sm font-medium text-gray-500">Total Profit (This Financial Year)</h3>
-                            <DollarSign className="h-4 w-4 text-gray-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                ₹{monthlyProfit.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
-                            </div>
-                            <p className={`text-xs ${profitChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                {profitChange >= 0 ? '+' : ''}
-                                {profitChange.toFixed(1)}% from last FY
-                            </p>
-                        </CardContent>
-                    </Card>
+                    <div onClick={() => setShowProfitPopup(true)}>
+                        <Card className="cursor-pointer">
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <h3 className="text-sm font-medium text-gray-500">Total Profit (This Financial Year)</h3>
+                                <DollarSign className="h-4 w-4 text-gray-500" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">
+                                    ₹{monthlyProfit.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+                                </div>
+                                <p className={`text-xs ${profitChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                    {profitChange >= 0 ? '+' : ''}
+                                    {profitChange.toFixed(1)}% from last FY
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </div>
+
 
 
 
@@ -419,6 +427,8 @@ const Dashboard = () => {
                             onClose={() => setShowDataView(false)}
                         />
                     )}
+                    {showProfitPopup && <ProfitPopup onClose={() => setShowProfitPopup(false)} />}
+
                 </div>
             </div>
 

@@ -544,3 +544,34 @@ export async function getFinancialYearMonthlyProfits() {
     profit: monthlyProfits[month] || 0
   }));
 }
+
+
+export async function getMonthlyProfitsByFY(fyStartYear) {
+  const fyEndYear = fyStartYear + 1;
+
+  const start = new Date(fyStartYear, 3, 1); // April 1
+  const end = new Date(fyEndYear, 3, 1);     // next year April 1
+
+  const { data, error } = await supabase
+    .from("projects")
+    .select("project_date, profit")
+    .eq("status", "Completed")
+    .gte("project_date", start.toISOString())
+    .lt("project_date", end.toISOString());
+
+  if (error) throw error;
+
+  const monthlyProfits = {};
+  data.forEach(({ project_date, profit }) => {
+    const date = new Date(project_date);
+    const month = date.toLocaleString('default', { month: 'short' });
+    monthlyProfits[month] = (monthlyProfits[month] || 0) + (profit || 0);
+  });
+
+  const monthsOrder = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
+
+  return monthsOrder.map(month => ({
+    month,
+    profit: monthlyProfits[month] || 0
+  }));
+}
