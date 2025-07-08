@@ -94,7 +94,7 @@ const Clients = () => {
                 {selectedClient.projects?.map((proj, index) => (
                   <tr key={proj.id} className="border-t hover:bg-gray-50 cursor-pointer" onClick={() => proj.invoice_no && setSelectedInvoice(proj.invoice_no)}>
                     <td className="px-3 py-1">{index + 1}</td>
-                    <td className="px-3 py-1 text-blue-600 underline">{proj.invoice_no || '—'}</td>
+                    <td className="px-3 py-1 text-blue-600 ">{proj.invoice_no || '—'}</td>
                     <td className="px-3 py-1">{proj.project_name}</td>
                     <td className="px-3 py-1">{new Date(proj.project_date).toLocaleDateString()}</td>
                     <td className="px-3 py-1">{proj.status}</td>
