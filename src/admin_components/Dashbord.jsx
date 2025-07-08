@@ -245,7 +245,7 @@ const Dashboard = () => {
                         <h2 className="text-xl font-semibold">Monthly Profit Trends</h2>
                         <button
                             onClick={() => setDateFilterOpen(!dateFilterOpen)}
-                            className="bg-blue-600 text-white px-3 py-1 text-sm rounded flex items-center gap-1"
+                            className=" bg-gray-100 text-gray-800 px-3 py-1 text-sm rounded flex items-center gap-1"
                             title={dateFilterOpen ? 'Close Filter' : 'Open Filter'}
                         >
                             {dateFilterOpen ? <FunnelX className="w-4 h-4" /> : <Funnel className="w-4 h-4" />}

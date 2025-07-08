@@ -198,7 +198,7 @@ export default function Admin() {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [navigate, activeComponent]);
+  }, [navigate]);
 
   return (
     <div className="h-screen min-h-screen w-screen flex bg-gray-100 font-sans">
