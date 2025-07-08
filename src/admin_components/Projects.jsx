@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2 } from 'lucide-react';
 import AddProject from './Addprojects';
+import SalesInvoiceDetail from './sub_admins/SalesInvoiceDetail'; // ✅ Import it
 import * as projectService from './sub_admins/projectService';
 
 export default function Projects() {
@@ -10,41 +11,38 @@ export default function Projects() {
   const [projectToEdit, setProjectToEdit] = useState(null);
   const [allProjects, setAllProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedInvoiceNo, setSelectedInvoiceNo] = useState(null); // ✅ Track invoice modal
+
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      const projects = await projectService.getProjects();
+      setAllProjects(projects);
+    } catch (error) {
+      console.error("Failed to fetch projects after save. Supabase error:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function loadProjects() {
-      try {
-        setLoading(true);
-        const projects = await projectService.getProjects();
-        setAllProjects(projects);
-      } catch (error) {
-        console.error("Failed to load projects. Supabase error:", error.message);
-        console.error("Full error object:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadProjects();
+    fetchProjects();
   }, []);
 
   const handleSave = async (data) => {
     try {
       if (modalMode === 'add') {
-        const newProjects = await projectService.addProjects(data.projects, data.status);
-        setAllProjects(prev => [...prev, ...newProjects]);
+        await projectService.addProjects(data.projects, data.status);
         setActiveFilter(data.status);
       } else {
         const updatedProject = await projectService.updateProject(data);
-        setAllProjects(prev =>
-          prev.map(p => (p.id === updatedProject.id ? updatedProject : p))
-        );
         if (updatedProject.status === 'Completed') {
           setActiveFilter('Completed');
         }
       }
+      await fetchProjects();
     } catch (error) {
       console.error("Failed to save project. Supabase error:", error.message);
-      console.error("Full error object:", error);
     } finally {
       setIsAddProjectVisible(false);
       setProjectToEdit(null);
@@ -59,7 +57,6 @@ export default function Projects() {
         setAllProjects(prev => prev.filter(p => p.id !== projectId));
       } catch (error) {
         console.error("Failed to delete project. Supabase error:", error.message);
-        console.error("Full error object:", error);
       }
     }
   };
@@ -103,11 +100,10 @@ export default function Projects() {
           <button
             key={status}
             onClick={() => setActiveFilter(status)}
-            className={`py-2 px-6 text-lg ${
-              activeFilter === status
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-500'
-            }`}
+            className={`py-2 px-6 text-lg ${activeFilter === status
+              ? 'border-b-2 border-blue-600 text-blue-600'
+              : 'text-gray-500'
+              }`}
           >
             {status}
           </button>
@@ -120,7 +116,15 @@ export default function Projects() {
           onClose={() => setIsAddProjectVisible(false)}
           mode={modalMode}
           projectToEdit={projectToEdit}
-          initialStatus={projectToEdit?.status ?? 'Upcoming'}  // ✅ NEW
+          initialStatus={projectToEdit?.status ?? 'Upcoming'}
+        />
+      )}
+
+      {/* ✅ Show SalesInvoiceDetail if invoice is selected */}
+      {selectedInvoiceNo && (
+        <SalesInvoiceDetail
+          invoiceNo={selectedInvoiceNo}
+          onClose={() => setSelectedInvoiceNo(null)}
         />
       )}
 
@@ -140,6 +144,20 @@ export default function Projects() {
                   <div>
                     <h3 className="text-2xl font-bold text-gray-800">
                       {project.project}
+                      <span
+                        onClick={(e) => {
+                          e.stopPropagation(); // prevent triggering edit
+                          if (project.invoiceNo) {
+                            setSelectedInvoiceNo(project.invoiceNo);
+                          }
+                        }}
+                        className={`text-base ml-2 cursor-pointer ${
+                          project.invoiceNo ? 'text-blue-600 hover:text-blue-800' : 'text-gray-500 cursor-not-allowed'
+                        }`}
+                        title={project.invoiceNo ? 'View Invoice Details' : 'Invoice not available'}
+                      >
+                        Invoice: {project.invoiceNo || 'Not added yet'}
+                      </span>
                     </h3>
                     <p className="text-gray-600">{project.clientName}</p>
                   </div>
@@ -157,23 +175,13 @@ export default function Projects() {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <InfoBox
-                    label="Final Value"
-                    value={project.finalValue}
-                  />
-                  <InfoBox
-                    label="Material Cost"
-                    value={project.matExpenses}
-                  />
+                  <InfoBox label="Final Value" value={project.finalValue} />
+                  <InfoBox label="Material Cost" value={project.matExpenses} />
                   <InfoBox
                     label="Labour + TA"
                     value={(parseFloat(project.labour || 0) + parseFloat(project.ta || 0))}
                   />
-                  <InfoBox
-                    label="Profit"
-                    value={project.profit}
-                    isProfit={true}
-                  />
+                  <InfoBox label="Profit" value={project.profit} isProfit={true} />
                 </div>
               </div>
             ))}
@@ -186,17 +194,9 @@ export default function Projects() {
 const InfoBox = ({ label, value, isProfit = false }) => {
   const formattedValue = `₹ ${parseFloat(value || 0).toLocaleString('en-IN')}`;
   return (
-    <div
-      className={`p-4 rounded-lg ${
-        isProfit ? 'bg-green-50' : 'bg-gray-100'
-      }`}
-    >
+    <div className={`p-4 rounded-lg ${isProfit ? 'bg-green-50' : 'bg-gray-100'}`}>
       <p className="text-sm text-gray-500">{label}</p>
-      <p
-        className={`text-xl font-semibold ${
-          isProfit ? 'text-green-600' : 'text-gray-800'
-        }`}
-      >
+      <p className={`text-xl font-semibold ${isProfit ? 'text-green-600' : 'text-gray-800'}`}>
         {formattedValue}
       </p>
     </div>

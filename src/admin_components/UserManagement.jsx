@@ -32,6 +32,7 @@ const UserManagement = () => {
     const fetchUsers = async () => {
         try {
             const fetchedUsers = await getAllUsers();
+            console.log("called getAllUsers", fetchedUsers)
             setUsers(fetchedUsers);
         } catch (err) {
             console.error("Error fetching users:", err);

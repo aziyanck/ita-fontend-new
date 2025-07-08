@@ -49,8 +49,8 @@ const DataView = ({ title, data, onClose }) => {
         const exportData = filteredData.map((project, index) => ({
             'Sl No': index + 1,
             'Project Name': project.project_name,
-            'Client Name': project.client_name,
-            'Contact': project.contact,
+            'Client Name': project.clients?.name || '',
+            'Contact': project.clients?.phone || '',
             'Location': project.location,
             'Project Date': new Date(project.project_date).toLocaleDateString(),
             'Invoice No': project.invoice_no,
@@ -176,8 +176,9 @@ const DataView = ({ title, data, onClose }) => {
                                     <tr key={project.id}>
                                         <td className="px-4 py-2">{index + 1}</td>
                                         <td className="px-4 py-2">{project.project_name}</td>
-                                        <td className="px-4 py-2">{project.client_name}</td>
-                                        <td className="px-4 py-2">{project.contact}</td>
+                                        <td>{project.clients?.name || '-'}</td>
+                                        <td>{project.clients?.phone || '-'}</td>
+
                                         <td className="px-4 py-2">{project.location}</td>
                                         <td className="px-4 py-2">
                                             {project.project_date

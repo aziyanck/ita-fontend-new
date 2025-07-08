@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Sector } from 'recharts';
 import { ArrowUpRight, DollarSign, Users, CreditCard, Activity } from 'lucide-react';
-import { getProjectStatuses, getProjectProfits, getMonthlyProfitSums, getCompletedProjectCounts, getOngoingProjectsCount, getUpcomingProjectsCount } from './supabaseServices'; // make sure path is correct
+import { getProjectStatuses, getProjectProfits, getMonthlyProfitSums, getFinancialYearProfitSums, getCompletedProjectCounts, getOngoingProjectsCount, getUpcomingProjectsCount } from './supabaseServices'; // make sure path is correct
 import { supabase } from './supabaseClient'; // Adjust the path as needed
 
 import UserManagement from './UserManagement';
 import DataView from './DataView';
+import ProfitPopup from './ProfitPopup';
 
 
 // --- Static Data for Bar and Line Charts ---
@@ -18,10 +19,6 @@ const barChartData = [
     { name: 'Jun', profit: 2390, expenses: 3800 },
     { name: 'Jul', profit: 3490, expenses: 4300 },
 ];
-
-
-
-
 
 
 
@@ -112,6 +109,10 @@ const Dashboard = () => {
     const [dataViewData, setDataViewData] = useState([]);
 
 
+    const [showProfitPopup, setShowProfitPopup] = useState(false);
+
+
+
 
 
     const onPieEnter = (_, index) => {
@@ -184,26 +185,27 @@ const Dashboard = () => {
 
 
     useEffect(() => {
-        const fetchMonthlyProfits = async () => {
+        const fetchFinancialYearProfits = async () => {
             try {
-                const { currentMonth, previousMonth } = await getMonthlyProfitSums();
-                setMonthlyProfit(currentMonth);
-
-                if (previousMonth === 0) {
-                    setProfitChange(0); // avoid division by zero
+                const { thisFY, lastFY } = await getFinancialYearProfitSums();
+                setMonthlyProfit(thisFY); // reuse existing state
+                if (lastFY === 0) {
+                    setProfitChange(0);
                 } else {
-                    const change = ((currentMonth - previousMonth) / previousMonth) * 100;
+                    const change = ((thisFY - lastFY) / lastFY) * 100;
                     setProfitChange(change);
                 }
             } catch (error) {
-                console.error('Failed to fetch monthly profits:', error);
+                console.error("Failed to fetch financial year profits:", error);
                 setMonthlyProfit(0);
                 setProfitChange(0);
             }
         };
 
-        fetchMonthlyProfits();
+        fetchFinancialYearProfits();
     }, []);
+
+
 
     useEffect(() => {
         const fetchCompletedProjects = async () => {
@@ -263,8 +265,9 @@ const Dashboard = () => {
         try {
             const { data, error } = await supabase
                 .from('projects')
-                .select('*')
+                .select('*, clients(name, phone)')
                 .eq('status', status);
+
 
             if (error) {
                 console.error(`Error fetching ${status} projects:`, error);
@@ -293,21 +296,26 @@ const Dashboard = () => {
 
                 {/* --- Stats Cards --- */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <h3 className="text-sm font-medium text-gray-500">Total Profit (This Month)</h3>
-                            <DollarSign className="h-4 w-4 text-gray-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                ₹{monthlyProfit.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
-                            </div>
-                            <p className={`text-xs ${profitChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                {profitChange >= 0 ? '+' : ''}
-                                {profitChange.toFixed(1)}% from last month
-                            </p>
-                        </CardContent>
-                    </Card>
+                    <div onClick={() => setShowProfitPopup(true)}>
+                        <Card className="cursor-pointer">
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <h3 className="text-sm font-medium text-gray-500">Total Profit (This Financial Year)</h3>
+                                <DollarSign className="h-4 w-4 text-gray-500" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">
+                                    ₹{monthlyProfit.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+                                </div>
+                                <p className={`text-xs ${profitChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                    {profitChange >= 0 ? '+' : ''}
+                                    {profitChange.toFixed(1)}% from last FY
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+
+
 
                     <div onClick={() => handleCardClick('Upcoming', 'Upcoming Projects')}>
                         <Card className="cursor-pointer">
@@ -419,6 +427,8 @@ const Dashboard = () => {
                             onClose={() => setShowDataView(false)}
                         />
                     )}
+                    {showProfitPopup && <ProfitPopup onClose={() => setShowProfitPopup(false)} />}
+
                 </div>
             </div>
 

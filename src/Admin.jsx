@@ -3,16 +3,6 @@ import { useNavigate } from "react-router-dom"
 import { supabase } from "./admin_components/supabaseClient"
 import { getUser } from "./admin_components/supabaseServices"
 // Make sure to install lucide-react: npm install lucide-react
-import {
-  LayoutDashboard,
-  Users,
-  ShoppingCart,
-  Settings,
-  Menu,
-  X,
-  HouseWifi,
-  Newspaper,
-} from "lucide-react"
 
 import Dashboard from "./admin_components/Dashbord"
 import GenerateQuotation from "./admin_components/GenerateQuotation"
@@ -20,6 +10,9 @@ import Products from "./admin_components/Products"
 import InvoiceGenerator from "./admin_components/InvoiceManager"
 import Projects from "./admin_components/Projects"
 import UserManagement from "./admin_components/UserManagement"
+import { LayoutDashboard, Users, ShoppingCart, Settings, Menu, X, HouseWifi, Newspaper } from 'lucide-react';
+import Clients from './admin_components/Clients'
+
 
 const Sidebar = ({
   activeComponent,
@@ -65,6 +58,7 @@ const Sidebar = ({
       component: "User Management",
       adminOnly: true,
     },
+         { name: 'Clients', icon: Users, component: 'Clients', adminOnly: true }
   ]
 
   const filteredNavItems = navItems.filter(
@@ -137,6 +131,8 @@ const MainContent = ({ activeComponent }) => {
         return <InvoiceGenerator />
       case "Projects":
         return <Projects />
+      case 'Clients':
+        return <Clients />;
       case "User Management":
         return <UserManagement />
       default:
@@ -149,10 +145,17 @@ const MainContent = ({ activeComponent }) => {
 // --- The Main App Component ---
 
 export default function Admin() {
-  const [activeComponent, setActiveComponent] = useState(null)
-  const [isSidebarOpen, setSidebarOpen] = useState(false)
-  const [userRole, setUserRole] = useState(null)
-  const navigate = useNavigate()
+    const [activeComponent, setActiveComponent] = useState(() => localStorage.getItem('activeComponent') || null);
+
+    const [isSidebarOpen, setSidebarOpen] = useState(false);
+    const [userRole, setUserRole] = useState(null);
+    const navigate = useNavigate();
+    useEffect(() => {
+        if (activeComponent) {
+            localStorage.setItem('activeComponent', activeComponent);
+        }
+    }, [activeComponent]);
+
 
   useEffect(() => {
     const checkSessionAndGetUser = async () => {
@@ -185,7 +188,17 @@ export default function Admin() {
             if (role === "admin") {
               setActiveComponent("Dashboard")
             } else {
-              setActiveComponent("Products")
+                const user = getUser();
+                const role = user?.user_metadata?.role || 'employee';
+                setUserRole(role);
+                if (!localStorage.getItem('activeComponent')) {
+                    if (role === 'admin') {
+                        setActiveComponent('Dashboard');
+                    } else {
+                        setActiveComponent('Products');
+                    }
+                }
+
             }
           })
         }
@@ -196,6 +209,24 @@ export default function Admin() {
       authListener.subscription.unsubscribe()
     }
   }, [navigate])
+        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (!session) {
+                navigate('/login');
+            } else {
+                getUser().then(user => {
+                    const role = user?.user_metadata?.role || 'employee';
+                    setUserRole(role);
+                    if (!localStorage.getItem('activeComponent')) {
+                        if (role === 'admin') {
+                            setActiveComponent('Dashboard');
+                        } else {
+                            setActiveComponent('Products');
+                        }
+                    }
+
+                });
+            }
+        });
 
   return (
     <div className="h-screen min-h-screen w-screen flex bg-gray-100 font-sans">
