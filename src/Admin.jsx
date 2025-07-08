@@ -47,8 +47,8 @@ const Sidebar = ({ activeComponent, setActiveComponent, isOpen, setIsOpen, userR
                                     if (isOpen) setIsOpen(false); // Close sidebar on mobile after click
                                 }}
                                 className={`w-full flex items-center p-3 my-2 rounded-lg transition-colors duration-200 ${activeComponent === item.component
-                                        ? 'bg-blue-600 text-white'
-                                        : 'hover:bg-gray-700'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'hover:bg-gray-700'
                                     }`}
                             >
                                 <item.icon className="mr-3" size={20} />
@@ -100,10 +100,17 @@ const MainContent = ({ activeComponent }) => {
 // --- The Main App Component ---
 
 export default function Admin() {
-    const [activeComponent, setActiveComponent] = useState(null);
+    const [activeComponent, setActiveComponent] = useState(() => localStorage.getItem('activeComponent') || null);
+
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const [userRole, setUserRole] = useState(null);
     const navigate = useNavigate();
+    useEffect(() => {
+        if (activeComponent) {
+            localStorage.setItem('activeComponent', activeComponent);
+        }
+    }, [activeComponent]);
+
 
     useEffect(() => {
         const checkSessionAndGetUser = async () => {
@@ -114,11 +121,14 @@ export default function Admin() {
                 const user = await getUser();
                 const role = user?.user_metadata?.role || 'employee';
                 setUserRole(role);
-                if (role === 'admin') {
-                    setActiveComponent('Dashboard');
-                } else {
-                    setActiveComponent('Products');
+                if (!localStorage.getItem('activeComponent')) {
+                    if (role === 'admin') {
+                        setActiveComponent('Dashboard');
+                    } else {
+                        setActiveComponent('Products');
+                    }
                 }
+
             }
         };
         checkSessionAndGetUser();
@@ -130,11 +140,14 @@ export default function Admin() {
                 getUser().then(user => {
                     const role = user?.user_metadata?.role || 'employee';
                     setUserRole(role);
-                    if (role === 'admin') {
-                        setActiveComponent('Dashboard');
-                    } else {
-                        setActiveComponent('Products');
+                    if (!localStorage.getItem('activeComponent')) {
+                        if (role === 'admin') {
+                            setActiveComponent('Dashboard');
+                        } else {
+                            setActiveComponent('Products');
+                        }
                     }
+
                 });
             }
         });
