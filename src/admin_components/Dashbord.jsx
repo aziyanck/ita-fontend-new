@@ -21,10 +21,6 @@ const barChartData = [
 
 
 
-
-
-
-
 const PIE_CHART_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 // --- Reusable Card Components ---
@@ -263,8 +259,9 @@ const Dashboard = () => {
         try {
             const { data, error } = await supabase
                 .from('projects')
-                .select('*')
+                .select('*, clients(name, phone)')
                 .eq('status', status);
+
 
             if (error) {
                 console.error(`Error fetching ${status} projects:`, error);

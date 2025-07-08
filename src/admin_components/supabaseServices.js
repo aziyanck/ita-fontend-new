@@ -236,17 +236,22 @@ export async function getSellsSummary() {
   return data
 }
 
+
+
 // for projects
 export async function getAllProjects() {
-  const { data, error } = await supabase.from("projects").select("*") // Fetch all columns
+  const { data, error } = await supabase
+    .from("projects")
+    .select("*, clients(name, phone)") // fetch related client data
 
   if (error) {
-    console.error("Error fetching projects:", error)
-    throw error // Optional: rethrow to handle elsewhere
+    console.error("Error fetching projects:", error);
+    throw error;
   }
 
-  return data // This will be an array of objects
+  return data;
 }
+
 
 export async function getProjectStatuses() {
   const { data, error } = await supabase.from("projects").select("status") // Only get the status field
