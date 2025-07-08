@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, Sector } from 'recharts';
-import { ArrowUpRight, DollarSign, Users, CreditCard, Activity } from 'lucide-react';
+import { ArrowUpRight, DollarSign, Users, Funnel,FunnelX,ListFilter, CreditCard, Activity } from 'lucide-react';
 import { getProjectStatuses, getProjectProfits, getFinancialYearProfitSums, getCompletedProjectCounts, getOngoingProjectsCount, getUpcomingProjectsCount } from './supabaseServices';
 import { supabase } from './supabaseClient';
 
@@ -76,6 +76,18 @@ const Dashboard = () => {
     const [dateFilterOpen, setDateFilterOpen] = useState(false);
     const [customStartDate, setCustomStartDate] = useState('');
     const [customEndDate, setCustomEndDate] = useState('');
+
+    useEffect(() => {
+        if (dateFilterOpen && (!customStartDate || !customEndDate)) {
+            const today = new Date();
+            const year = today.getMonth() + 1 >= 4 ? today.getFullYear() : today.getFullYear() - 1;
+            const start = `${year}-04-01`;
+            const end = `${year + 1}-03-31`;
+
+            setCustomStartDate(start);
+            setCustomEndDate(end);
+        }
+    }, [dateFilterOpen]);
 
     const onPieEnter = (_, index) => setActivePieIndex(index);
 
@@ -231,8 +243,12 @@ const Dashboard = () => {
                 <CardHeader>
                     <div className="flex justify-between items-center mb-2">
                         <h2 className="text-xl font-semibold">Monthly Profit Trends</h2>
-                        <button onClick={() => setDateFilterOpen(!dateFilterOpen)} className="bg-blue-600 text-white px-3 py-1 text-sm rounded">
-                            {dateFilterOpen ? 'Close Filter' : 'Filter'}
+                        <button
+                            onClick={() => setDateFilterOpen(!dateFilterOpen)}
+                            className="bg-blue-600 text-white px-3 py-1 text-sm rounded flex items-center gap-1"
+                            title={dateFilterOpen ? 'Close Filter' : 'Open Filter'}
+                        >
+                            {dateFilterOpen ? <FunnelX className="w-4 h-4" /> : <Funnel className="w-4 h-4" />}
                         </button>
                     </div>
                     {dateFilterOpen && (
@@ -260,7 +276,7 @@ const Dashboard = () => {
 
             {/* --- Pie Chart --- */}
             <Card>
-                <CardHeader>    
+                <CardHeader>
                     <h2 className="text-xl font-semibold">Project Status Distribution</h2>
                 </CardHeader>
                 <CardContent className="h-[400px]">
