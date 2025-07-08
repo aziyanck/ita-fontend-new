@@ -10,9 +10,17 @@ import Products from "./admin_components/Products"
 import InvoiceGenerator from "./admin_components/InvoiceManager"
 import Projects from "./admin_components/Projects"
 import UserManagement from "./admin_components/UserManagement"
-import { LayoutDashboard, Users, ShoppingCart, Settings, Menu, X, HouseWifi, Newspaper } from 'lucide-react';
-import Clients from './admin_components/Clients'
-
+import {
+  LayoutDashboard,
+  Users,
+  ShoppingCart,
+  Settings,
+  Menu,
+  X,
+  HouseWifi,
+  Newspaper,
+} from "lucide-react"
+import Clients from "./admin_components/Clients"
 
 const Sidebar = ({
   activeComponent,
@@ -58,7 +66,7 @@ const Sidebar = ({
       component: "User Management",
       adminOnly: true,
     },
-         { name: 'Clients', icon: Users, component: 'Clients', adminOnly: true }
+    { name: "Clients", icon: Users, component: "Clients", adminOnly: true },
   ]
 
   const filteredNavItems = navItems.filter(
@@ -131,8 +139,8 @@ const MainContent = ({ activeComponent }) => {
         return <InvoiceGenerator />
       case "Projects":
         return <Projects />
-      case 'Clients':
-        return <Clients />;
+      case "Clients":
+        return <Clients />
       case "User Management":
         return <UserManagement />
       default:
@@ -145,59 +153,60 @@ const MainContent = ({ activeComponent }) => {
 // --- The Main App Component ---
 
 export default function Admin() {
-    const [activeComponent, setActiveComponent] = useState(() => localStorage.getItem('activeComponent') || null);
+  const [activeComponent, setActiveComponent] = useState(
+    () => localStorage.getItem("activeComponent") || null,
+  )
 
-    const [isSidebarOpen, setSidebarOpen] = useState(false);
-    const [userRole, setUserRole] = useState(null);
-    const navigate = useNavigate();
-    useEffect(() => {
-        if (activeComponent) {
-            localStorage.setItem('activeComponent', activeComponent);
-        }
-    }, [activeComponent]);
-
+  const [isSidebarOpen, setSidebarOpen] = useState(false)
+  const [userRole, setUserRole] = useState(null)
+  const navigate = useNavigate()
+  useEffect(() => {
+    if (activeComponent) {
+      localStorage.setItem("activeComponent", activeComponent)
+    }
+  }, [activeComponent])
 
   useEffect(() => {
     const handleUserSession = async (session) => {
       if (!session) {
         // On logout, clear the stored component and redirect to login
-        localStorage.removeItem('activeComponent');
-        navigate("/login");
-        return;
+        localStorage.removeItem("activeComponent")
+        navigate("/login")
+        return
       }
 
-      const user = await getUser();
-      const role = user?.user_metadata?.role || "employee";
-      setUserRole(role);
+      const user = await getUser()
+      const role = user?.app_metadata?.role || "employee"
+      setUserRole(role)
 
       // If there's no active component loaded from localStorage,
       // set a default based on the user's role.
       if (!activeComponent) {
         if (role === "admin") {
-          setActiveComponent("Dashboard");
+          setActiveComponent("Dashboard")
         } else {
-          setActiveComponent("Products");
+          setActiveComponent("Products")
         }
       }
-    };
+    }
 
     // Initially, check if a session exists
     supabase.auth.getSession().then(({ data: { session } }) => {
-      handleUserSession(session);
-    });
+      handleUserSession(session)
+    })
 
     // Listen for changes in authentication state (login/logout)
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        handleUserSession(session);
-      }
-    );
+        handleUserSession(session)
+      },
+    )
 
     // Cleanup the listener when the component is unmounted
     return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, [navigate, activeComponent]);
+      authListener.subscription.unsubscribe()
+    }
+  }, [navigate, activeComponent])
 
   return (
     <div className="h-screen min-h-screen w-screen flex bg-gray-100 font-sans">
