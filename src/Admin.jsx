@@ -158,75 +158,46 @@ export default function Admin() {
 
 
   useEffect(() => {
-    const checkSessionAndGetUser = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
+    const handleUserSession = async (session) => {
       if (!session) {
-        navigate("/login")
-      } else {
-        const user = await getUser()
-        const role = user?.user_metadata?.role || "employee"
-        setUserRole(role)
+        // On logout, clear the stored component and redirect to login
+        localStorage.removeItem('activeComponent');
+        navigate("/login");
+        return;
+      }
+
+      const user = await getUser();
+      const role = user?.user_metadata?.role || "employee";
+      setUserRole(role);
+
+      // If there's no active component loaded from localStorage,
+      // set a default based on the user's role.
+      if (!activeComponent) {
         if (role === "admin") {
-          setActiveComponent("Dashboard")
+          setActiveComponent("Dashboard");
         } else {
-          setActiveComponent("Products")
+          setActiveComponent("Products");
         }
       }
-    }
-    checkSessionAndGetUser()
+    };
 
+    // Initially, check if a session exists
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      handleUserSession(session);
+    });
+
+    // Listen for changes in authentication state (login/logout)
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        if (!session) {
-          navigate("/login")
-        } else {
-          getUser().then((user) => {
-            const role = user?.user_metadata?.role || "employee"
-            setUserRole(role)
-            if (role === "admin") {
-              setActiveComponent("Dashboard")
-            } else {
-                const user = getUser();
-                const role = user?.user_metadata?.role || 'employee';
-                setUserRole(role);
-                if (!localStorage.getItem('activeComponent')) {
-                    if (role === 'admin') {
-                        setActiveComponent('Dashboard');
-                    } else {
-                        setActiveComponent('Products');
-                    }
-                }
+        handleUserSession(session);
+      }
+    );
 
-            }
-          })
-        }
-      },
-    )
-
+    // Cleanup the listener when the component is unmounted
     return () => {
-      authListener.subscription.unsubscribe()
-    }
-  }, [navigate])
-        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-            if (!session) {
-                navigate('/login');
-            } else {
-                getUser().then(user => {
-                    const role = user?.user_metadata?.role || 'employee';
-                    setUserRole(role);
-                    if (!localStorage.getItem('activeComponent')) {
-                        if (role === 'admin') {
-                            setActiveComponent('Dashboard');
-                        } else {
-                            setActiveComponent('Products');
-                        }
-                    }
-
-                });
-            }
-        });
+      authListener.subscription.unsubscribe();
+    };
+  }, [navigate, activeComponent]);
 
   return (
     <div className="h-screen min-h-screen w-screen flex bg-gray-100 font-sans">
