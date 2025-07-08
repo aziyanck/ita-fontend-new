@@ -575,3 +575,26 @@ export async function getMonthlyProfitsByFY(fyStartYear) {
     profit: monthlyProfits[month] || 0
   }));
 }
+
+
+
+export async function getAllClientsWithProjects() {
+  const { data, error } = await supabase
+    .from('clients')
+    .select(`
+      id,
+      name,
+      phone,
+      projects (
+        id,
+        project_name,
+        project_date,
+        profit,
+        status,
+        location
+      )
+    `);
+
+  if (error) throw error;
+  return data;
+}

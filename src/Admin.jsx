@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from './admin_components/supabaseClient';
 import { getUser } from './admin_components/supabaseServices';
 // Make sure to install lucide-react: npm install lucide-react
-import { LayoutDashboard, Users, ShoppingCart, Settings, Menu, X ,HouseWifi, Newspaper } from 'lucide-react';
+import { LayoutDashboard, Users, ShoppingCart, Settings, Menu, X, HouseWifi, Newspaper } from 'lucide-react';
 
 import Dashboard from './admin_components/Dashbord'
 import GenerateQuotation from './admin_components/GenerateQuotation'
 import Products from './admin_components/Products'
 import InvoiceGenerator from './admin_components/InvoiceManager'
 import Projects from './admin_components/Projects'
+import Clients from './admin_components/Clients'
+
 
 
 
@@ -21,7 +23,8 @@ const Sidebar = ({ activeComponent, setActiveComponent, isOpen, setIsOpen, userR
         { name: 'Generate Quotation', icon: Newspaper, component: 'Generate Quotation', adminOnly: false },
         { name: 'Products', icon: ShoppingCart, component: 'Products', adminOnly: false },
         { name: 'Generate Invoice', icon: Newspaper, component: 'Generate Invoice', adminOnly: false },
-        { name: 'Projects', icon: HouseWifi, component: 'Projects', adminOnly: true }
+        { name: 'Projects', icon: HouseWifi, component: 'Projects', adminOnly: true },
+        { name: 'Clients', icon: Users, component: 'Clients', adminOnly: true }
     ];
 
     const filteredNavItems = navItems.filter(item => !item.adminOnly || userRole === 'admin');
@@ -43,8 +46,7 @@ const Sidebar = ({ activeComponent, setActiveComponent, isOpen, setIsOpen, userR
                                     setActiveComponent(item.component)
                                     if (isOpen) setIsOpen(false); // Close sidebar on mobile after click
                                 }}
-                                className={`w-full flex items-center p-3 my-2 rounded-lg transition-colors duration-200 ${
-                                    activeComponent === item.component
+                                className={`w-full flex items-center p-3 my-2 rounded-lg transition-colors duration-200 ${activeComponent === item.component
                                         ? 'bg-blue-600 text-white'
                                         : 'hover:bg-gray-700'
                                     }`}
@@ -86,6 +88,8 @@ const MainContent = ({ activeComponent }) => {
                 return <InvoiceGenerator />;
             case 'Projects':
                 return <Projects />;
+            case 'Clients':
+                return <Clients />;
             default:
                 return <Dashboard />;
         }
