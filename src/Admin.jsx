@@ -10,7 +10,7 @@ import Products from "./admin_components/Products"
 import InvoiceGenerator from "./admin_components/InvoiceManager"
 import Projects from "./admin_components/Projects"
 import UserManagement from "./admin_components/UserManagement"
-import { LayoutDashboard, Users, ShoppingCart, Settings, Menu, X, HouseWifi, Newspaper } from 'lucide-react';
+import { LayoutDashboard, Users, ShoppingCart, UserCog, Menu, X, HouseWifi, Newspaper } from 'lucide-react';
 import Clients from './admin_components/Clients'
 
 
@@ -52,13 +52,14 @@ const Sidebar = ({
       component: "Projects",
       adminOnly: true,
     },
+     { name: 'Clients', icon: Users, component: 'Clients', adminOnly: true },
     {
       name: "User Management",
-      icon: Users,
+      icon: UserCog,
       component: "User Management",
       adminOnly: true,
     },
-         { name: 'Clients', icon: Users, component: 'Clients', adminOnly: true }
+        
   ]
 
   const filteredNavItems = navItems.filter(

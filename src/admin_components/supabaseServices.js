@@ -263,24 +263,45 @@ export async function getProjectStatuses() {
   return data; // Array of objects like [{ status: 'In Progress' }, ...]
 }
 
-export async function getProjectProfits() {
+// export async function getProjectProfits() {
+//   const now = new Date();
+//   const startOfYear = `${now.getFullYear()}-01-01`;
+//   const endOfYear = `${now.getFullYear()}-12-31`;
+
+//   const { data, error } = await supabase
+//     .from("projects")
+//     .select("project_date, profit, status")
+//     .gte("project_date", startOfYear)
+//     .lte("project_date", endOfYear);
+
+//   if (error) {
+//     console.error("Error fetching project profits:", error);
+//     throw error;
+//   }
+
+//   return data; // only data within the current year
+// }
+
+
+export async function getProjectProfits(startDate, endDate) {
   const now = new Date();
-  const startOfYear = `${now.getFullYear()}-01-01`;
-  const endOfYear = `${now.getFullYear()}-12-31`;
+  const start = startDate || `${now.getFullYear()}-01-01`;
+  const end = endDate || `${now.getFullYear()}-12-31`;
 
   const { data, error } = await supabase
     .from("projects")
     .select("project_date, profit, status")
-    .gte("project_date", startOfYear)
-    .lte("project_date", endOfYear);
+    .gte("project_date", start)
+    .lte("project_date", end);
 
   if (error) {
     console.error("Error fetching project profits:", error);
     throw error;
   }
 
-  return data; // only data within the current year
+  return data;
 }
+
 
 export async function getMonthlyProfitSums() {
   const now = new Date();
