@@ -2,6 +2,8 @@
 
 import { supabase } from "./supabaseClient"
 
+const BACKEND_URL = "https://jobqueue.onrender.com"
+
 // 1) Insert an invoice
 export const insertInvoice = async (invoiceData) => {
   const { data, error } = await supabase
@@ -406,30 +408,114 @@ export const loginUser = async (email, password) => {
   return data
 }
 
-export const registerUser = async (email, password) => {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: "https://ita-fontend-new.vercel.app/admin",
+export const registerUser = async (email, password, name) => {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  const accessToken = session?.access_token
+
+  if (!accessToken) {
+    throw new Error("Authentication required: No active session found.")
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/admin/register-user`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
+    body: JSON.stringify({ email, password, name, role: "employee" }),
   })
-  if (error) throw error
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to register user via backend.")
+  }
   return data
 }
 
-export const registerAdmin = async (email, password) => {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: "https://ita-fontend-new.vercel.app/admin",
-      data: {
-        role: "admin",
-      },
+export const registerAdmin = async (email, password, name) => {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  const accessToken = session?.access_token
+
+  if (!accessToken) {
+    throw new Error("Authentication required: No active session found.")
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/admin/register-user`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ email, password, name, role: "admin" }),
+  })
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to register admin via backend.")
+  }
+  return data
+}
+
+export const getAllUsers = async () => {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  const accessToken = session?.access_token
+
+  console.log('getAllUsers: BACKEND_URL:', BACKEND_URL); // LOG
+  console.log('getAllUsers: Access Token:', accessToken); // LOG
+
+  if (!accessToken) {
+    throw new Error("Authentication required: No active session found.")
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/admin/users`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
     },
   })
-  if (error) throw error
+
+  console.log('getAllUsers: Fetch Response:', response); // LOG
+
+  const data = await response.json()
+
+  console.log('getAllUsers: Response Data:', data); // LOG
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to fetch users via backend.")
+  }
+  return data
+}
+
+export const deleteUser = async (userId) => {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  const accessToken = session?.access_token
+
+  if (!accessToken) {
+    throw new Error("Authentication required: No active session found.")
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/admin/user/${userId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  })
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to delete user via backend.")
+  }
   return data
 }
 
@@ -455,3 +541,4 @@ export const getUser = async () => {
   }
   return null
 }
+

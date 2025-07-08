@@ -411,7 +411,7 @@ const Dashboard = () => {
                     </Card>
 
 
-                    <UserManagement />
+                    
                     {showDataView && (
                         <DataView
                             title={dataViewTitle}
