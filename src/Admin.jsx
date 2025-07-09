@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "./admin_components/supabaseClient"
-import { getUser } from "./admin_components/supabaseServices"
+import { getAllUsers, getUser } from "./admin_components/supabaseServices"
 // Make sure to install lucide-react: npm install lucide-react
 
 import Dashboard from "./admin_components/Dashbord"
@@ -198,6 +198,10 @@ export default function Admin() {
     () => localStorage.getItem("activeComponent") || null,
   )
 
+  useEffect(() => {
+    getAllUsers()
+  }, [])
+
   const [isSidebarOpen, setSidebarOpen] = useState(false)
   const [userRole, setUserRole] = useState(null)
   const navigate = useNavigate()
@@ -207,46 +211,45 @@ export default function Admin() {
     }
   }, [activeComponent])
 
-useEffect(() => {
-  const handleUserSession = async (session) => {
-    if (!session) {
-      localStorage.removeItem("activeComponent")
-      navigate("/login")
-      return
+  useEffect(() => {
+    const handleUserSession = async (session) => {
+      if (!session) {
+        localStorage.removeItem("activeComponent")
+        navigate("/login")
+        return
+      }
+
+      const user = await getUser()
+      const role = user?.app_metadata?.role || "employee"
+      setUserRole(role)
+
+      const storedComponent = localStorage.getItem("activeComponent")
+
+      if (!storedComponent) {
+        // Only set default if no value is in localStorage
+        const defaultComponent = role === "admin" ? "Dashboard" : "Products"
+        setActiveComponent(defaultComponent)
+        localStorage.setItem("activeComponent", defaultComponent)
+      } else {
+        // Make sure state is synced with localStorage
+        setActiveComponent(storedComponent)
+      }
     }
 
-    const user = await getUser()
-    const role = user?.app_metadata?.role || "employee"
-    setUserRole(role)
-
-    const storedComponent = localStorage.getItem("activeComponent")
-    
-    if (!storedComponent) {
-      // Only set default if no value is in localStorage
-      const defaultComponent = role === "admin" ? "Dashboard" : "Products"
-      setActiveComponent(defaultComponent)
-      localStorage.setItem("activeComponent", defaultComponent)
-    } else {
-      // Make sure state is synced with localStorage
-      setActiveComponent(storedComponent)
-    }
-  }
-
-  supabase.auth.getSession().then(({ data: { session } }) => {
-    handleUserSession(session)
-  })
-
-  const { data: authListener } = supabase.auth.onAuthStateChange(
-    (_event, session) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       handleUserSession(session)
-    },
-  )
+    })
 
-  return () => {
-    authListener.subscription.unsubscribe()
-  }
-}, [navigate])
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        handleUserSession(session)
+      },
+    )
 
+    return () => {
+      authListener.subscription.unsubscribe()
+    }
+  }, [navigate])
 
   return (
     <div className="h-screen min-h-screen w-screen flex bg-gray-100 font-sans">
