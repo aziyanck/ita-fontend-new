@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getAllClientsWithProjects } from './supabaseServices';
 import SalesInvoiceDetail from './sub_admins/SalesInvoiceDetail';
+import { supabase } from './supabaseClient'
 
 const Clients = () => {
   const [clients, setClients] = useState([]);
@@ -35,6 +36,31 @@ const Clients = () => {
   const closeDetails = () => setSelectedClient(null);
   const closeInvoice = () => setSelectedInvoice(null);
 
+
+
+  const handleDeleteClient = async (client) => {
+    if (client.projects && client.projects.length > 0) {
+      alert("Cannot delete a client who has projects.");
+      return;
+    }
+
+    const confirmDelete = window.confirm(`Are you sure you want to delete ${client.name}?`);
+    if (!confirmDelete) return;
+
+    const { error } = await supabase.from("clients").delete().eq("id", client.id);
+    if (error) {
+      console.error("Error deleting client:", error.message);
+      alert("Failed to delete client.");
+      return;
+    }
+
+    // Remove deleted client from local state
+    const updatedClients = clients.filter(c => c.id !== client.id);
+    setClients(updatedClients);
+    setFilteredClients(updatedClients);
+  };
+
+
   const getClientTotalProfit = (projects = []) =>
     projects.reduce((sum, p) => sum + (p.profit || 0), 0);
 
@@ -55,16 +81,30 @@ const Clients = () => {
         {filteredClients.map(client => (
           <div
             key={client.id}
-            className="p-4 bg-white rounded-xl shadow hover:bg-gray-50 cursor-pointer"
-            onClick={() => setSelectedClient(client)}
+            className="p-4 bg-white rounded-xl shadow hover:bg-gray-50 relative"
           >
-            <h3 className="text-lg font-semibold">{client.name}</h3>
-            <p className="text-sm text-gray-500">{client.phone}</p>
-            <p className="text-sm text-gray-600">{client.projects?.length || 0} projects</p>
-            <p className="text-sm text-green-600 font-medium">
-              ₹{getClientTotalProfit(client.projects).toLocaleString('en-IN')} total profit
-            </p>
+            <div
+              className="cursor-pointer"
+              onClick={() => setSelectedClient(client)}
+            >
+              <h3 className="text-lg font-semibold">{client.name}</h3>
+              <p className="text-sm text-gray-500">{client.phone}</p>
+              <p className="text-sm text-gray-600">{client.projects?.length || 0} projects</p>
+              <p className="text-sm text-green-600 font-medium">
+                ₹{getClientTotalProfit(client.projects).toLocaleString('en-IN')} total profit
+              </p>
+            </div>
+
+            {client.projects?.length === 0 && (
+              <button
+                onClick={() => handleDeleteClient(client)}
+                className="absolute top-2 right-2 text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200"
+              >
+                Delete
+              </button>
+            )}
           </div>
+
         ))}
       </div>
 
