@@ -455,3 +455,13 @@ export const getUser = async () => {
   }
   return null
 }
+//contact_form
+export const getContactSubmissions = async () => {
+  const { data, error } = await supabase
+    .from('contact_submissions')
+    .select('*')
+    .order('created_at', { ascending: false }); // Show newest first
+
+  if (error) throw error;
+  return data;
+};

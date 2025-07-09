@@ -24,7 +24,6 @@ export async function getProjects() {
     return data.map(formatProjectForUI);
 }
 
-// === FUNCTION 1: CORRECTED ===
 export async function addProjects(projects, status) {
     const projectsToInsert = projects.map(proj => {
     const final = parseFloat(proj.finalValue) || 0;
@@ -45,7 +44,7 @@ export async function addProjects(projects, status) {
         material_expenses: mat, 
         labour_cost: labour, 
         ta_cost: ta,
-        profit: profit,  // ✅ NEW LINE: Push calculated profit
+        profit: profit,  
         status: status,
     };
 });
@@ -56,7 +55,7 @@ export async function addProjects(projects, status) {
     return data.map(formatProjectForUI);
 }
 
-// === FUNCTION 2: CORRECTED ===
+
 export async function updateProject(project) {
     const final = parseFloat(project.finalValue) || 0;
 const mat = parseFloat(project.matExpenses) || 0;
@@ -76,7 +75,7 @@ const projectToUpdate = {
     material_expenses: mat, 
     labour_cost: labour, 
     ta_cost: ta,
-    profit: profit,  // ✅ NEW LINE: Push calculated profit
+    profit: profit,  
     status: project.status,
 };
 
