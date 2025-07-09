@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, Sector } from 'recharts';
 import { ArrowUpRight, DollarSign, Users, Funnel,FunnelX,ListFilter, CreditCard, Activity } from 'lucide-react';
-import { getProjectStatuses, getProjectProfits, getFinancialYearProfitSums, getCompletedProjectCounts, getOngoingProjectsCount, getUpcomingProjectsCount } from './supabaseServices';
+import { getProjectStatuses, getProjectProfits, getFinancialYearProfitSums, getCompletedProjectCounts, getOngoingProjectsCount, getUpcomingProjectsCount, getAllUsers } from './supabaseServices';
 import { supabase } from './supabaseClient';
 
 import DataView from './DataView';
@@ -76,6 +76,10 @@ const Dashboard = () => {
     const [dateFilterOpen, setDateFilterOpen] = useState(false);
     const [customStartDate, setCustomStartDate] = useState('');
     const [customEndDate, setCustomEndDate] = useState('');
+
+    useEffect(() => {
+        getAllUsers()
+    }, [])
 
     useEffect(() => {
         if (dateFilterOpen && (!customStartDate || !customEndDate)) {
