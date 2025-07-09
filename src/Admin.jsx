@@ -207,47 +207,46 @@ export default function Admin() {
     }
   }, [activeComponent])
 
-  useEffect(() => {
-    const handleUserSession = async (session) => {
-      if (!session) {
-        // On logout, clear the stored component and redirect to login
-        localStorage.removeItem("activeComponent")
-        navigate("/login")
-        return
-      }
-
-      const user = await getUser()
-      const role = user?.app_metadata?.role || "employee"
-      setUserRole(role)
-
-      // If there's no active component loaded from localStorage,
-      // set a default based on the user's role.
-      if (!activeComponent) {
-        if (role === "admin") {
-          setActiveComponent("Dashboard")
-        } else {
-          setActiveComponent("Products")
-        }
-      }
+useEffect(() => {
+  const handleUserSession = async (session) => {
+    if (!session) {
+      localStorage.removeItem("activeComponent")
+      navigate("/login")
+      return
     }
 
-    // Initially, check if a session exists
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const user = await getUser()
+    const role = user?.app_metadata?.role || "employee"
+    setUserRole(role)
+
+    const storedComponent = localStorage.getItem("activeComponent")
+    
+    if (!storedComponent) {
+      // Only set default if no value is in localStorage
+      const defaultComponent = role === "admin" ? "Dashboard" : "Products"
+      setActiveComponent(defaultComponent)
+      localStorage.setItem("activeComponent", defaultComponent)
+    } else {
+      // Make sure state is synced with localStorage
+      setActiveComponent(storedComponent)
+    }
+  }
+
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    handleUserSession(session)
+  })
+
+  const { data: authListener } = supabase.auth.onAuthStateChange(
+    (_event, session) => {
       handleUserSession(session)
-    })
+    },
+  )
 
-    // Listen for changes in authentication state (login/logout)
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        handleUserSession(session)
-      },
-    )
+  return () => {
+    authListener.subscription.unsubscribe()
+  }
+}, [navigate])
 
-    // Cleanup the listener when the component is unmounted
-    return () => {
-      authListener.subscription.unsubscribe()
-    }
-  }, [navigate])
 
   return (
     <div className="h-screen min-h-screen w-screen flex bg-gray-100 font-sans">
