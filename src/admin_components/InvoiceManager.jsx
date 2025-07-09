@@ -728,30 +728,6 @@ function InvoiceManager() {
               handleNestedChange("customer", "gstin", e.target.value)
             }
           />
-          <input
-            className="px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="Order No."
-            value={invoiceData.customer.orderNo}
-            onChange={(e) =>
-              handleNestedChange("customer", "orderNo", e.target.value)
-            }
-          />
-          <input
-            className="px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="Supplier Ref"
-            value={invoiceData.customer.supplierRef}
-            onChange={(e) =>
-              handleNestedChange("customer", "supplierRef", e.target.value)
-            }
-          />
-          <input
-            className="px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="Destination"
-            value={invoiceData.customer.destination}
-            onChange={(e) =>
-              handleNestedChange("customer", "destination", e.target.value)
-            }
-          />
         </div>
         <textarea
           className="w-full px-3 py-2 border border-gray-300 rounded-md h-24"
